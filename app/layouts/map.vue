@@ -33,20 +33,14 @@
                     <li>
                         <button @click="closeDrawer" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                             data-tip="Jelajahi Peta">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
-                                stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
-                                class="my-1.5 inline-block size-4">
-                                <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
-                                <path
-                                    d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z">
-                                </path>
-                            </svg>
+                            <MapPin class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Jelajahi Peta</span>
                         </button>
                     </li>
 
                     <li>
-                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tambah Cerita">
+                        <button @click="startAddMode" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                            data-tip="Tambah Cerita">
                             <MapPinPlus class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Tambah Cerita</span>
                         </button>
@@ -100,10 +94,15 @@
     <AuthModal />
     <MyStoriesModal />
     <AllStoriesModal />
+    <AddStoryModal ref="addStoryModalRef" @submit="handleAddStorySubmit" />
 </template>
 
 <script setup>
-import { MapPinPlus, Book, User, BookOpen } from 'lucide-vue-next';
+import { MapPinPlus, Book, User, BookOpen, MapPin } from 'lucide-vue-next';
+import { useAddStoryMode } from '~/composables/useAddStoryMode';
+
+const addStoryModalRef = ref(null);
+const { startAddMode } = useAddStoryMode();
 
 const openModal = (modalId) => {
     document.getElementById(modalId).showModal();
@@ -114,6 +113,16 @@ const closeDrawer = () => {
     if (drawerCheckbox) {
         drawerCheckbox.checked = false;
     }
+};
+
+const startAddModeHandler = () => {
+    closeDrawer();
+    startAddMode();
+};
+
+const handleAddStorySubmit = (formData) => {
+    console.log('Story submitted:', formData);
+    alert(`Cerita "${formData.title}" berhasil ditambahkan! (dummy)`);
 };
 </script>
 
