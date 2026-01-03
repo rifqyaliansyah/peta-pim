@@ -3,8 +3,11 @@
         <div class="modal-box max-w-4xl flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between mb-6 shrink-0">
                 <div>
-                    <h3 class="text-xl font-bold">{{ isEditMode ? 'Edit Cerita' : 'Cerita Saya' }}</h3>
-                    <p v-if="!isEditMode" class="text-sm opacity-60 mt-1">{{ myStories.length }} cerita</p>
+                    <h3 class="text-xl font-bold">
+                        {{ isEditMode ? 'Edit Cerita' : (selectedStory ? selectedStory.title : 'Cerita Saya') }}
+                    </h3>
+                    <p v-if="!isEditMode && !selectedStory" class="text-sm opacity-60 mt-1">{{ myStories.length }}
+                        cerita</p>
                 </div>
                 <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
                     <X :size="20" />
@@ -20,7 +23,7 @@
                 <span>{{ errorMessage }}</span>
             </div>
 
-            <div v-if="!isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+            <div v-if="!isEditMode && !selectedStory" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
                 <div v-if="myStories.length === 0" class="text-center py-12">
                     <BookOpen :size="48" class="mx-auto opacity-30 mb-4" />
                     <p class="text-base-content/60">Belum ada cerita yang ditambahkan</p>
@@ -63,7 +66,7 @@
                 </div>
             </div>
 
-            <div v-else class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+            <div v-if="isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
                 <div class="space-y-4">
                     <div class="form-control">
                         <label class="label">
@@ -83,20 +86,53 @@
 
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text font-semibold mb-1">Deskripsi</span>
+                            <span class="label-text font-semibold mb-1">Deskripsi Singkat</span>
                         </label>
-                        <textarea v-model="editForm.description" placeholder="Ceritakan kisah atau legenda ini..."
-                            class="textarea textarea-bordered h-32 w-full"></textarea>
+                        <textarea v-model="editForm.description" placeholder="Deskripsi singkat cerita..."
+                            class="textarea textarea-bordered h-24 w-full"></textarea>
                         <label class="label">
                             <span class="label-text-alt opacity-60">{{ editForm.description.length }} karakter</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold mb-1">Cerita Lengkap</span>
+                        </label>
+                        <textarea v-model="editForm.full_story" placeholder="Tulis cerita lengkap di sini..."
+                            class="textarea textarea-bordered h-64 w-full"></textarea>
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">{{ editForm.full_story.length }} karakter</span>
                         </label>
                     </div>
                 </div>
             </div>
 
+            <div v-if="selectedStory && !isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+                <div class="space-y-6">
+                    <div>
+                        <div class="mb-3">
+                            <p class="font-semibold">{{ selectedStory.author }}</p>
+                            <p class="text-xs opacity-60">{{ selectedStory.date }}</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm opacity-70">
+                            <MapPin :size="16" />
+                            <span>{{ selectedStory.location }}</span>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="prose max-w-none">
+                        <p class="text-base leading-relaxed whitespace-pre-line">{{ selectedStory.full_story }}</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="modal-action mt-6 shrink-0 pt-4 border-t border-base-300">
-                <button v-if="!isEditMode" @click="closeModal" class="btn btn-ghost">Tutup</button>
-                <template v-else>
+                <button v-if="!isEditMode && !selectedStory" @click="closeModal" class="btn btn-ghost">Tutup</button>
+                <button v-if="selectedStory && !isEditMode" @click="backToList" class="btn btn-ghost">Kembali</button>
+                <template v-if="isEditMode">
                     <button @click="cancelEdit" class="btn btn-ghost" :disabled="submitting">Batal</button>
                     <button @click="submitEdit" class="btn btn-primary" :disabled="submitting">
                         <span v-if="submitting" class="loading loading-spinner"></span>
@@ -111,41 +147,78 @@
             </div>
         </div>
     </dialog>
-
-    <DeleteStoryModal ref="deleteModalRef" />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { X, BookOpen, MapPin, Calendar, Edit, Trash2 } from 'lucide-vue-next';
-import DeleteStoryModal from './DeleteStoryModal.vue';
 
 const isEditMode = ref(false);
 const submitting = ref(false);
 const errorMessage = ref('');
-const deleteModalRef = ref(null);
+const selectedStory = ref(null);
 
 const myStories = ref([
     {
         id: 1,
         title: 'Legenda Tangkuban Perahu',
+        author: 'Anda',
         location: 'Bandung, Jawa Barat',
         date: '15 Des 2024',
-        description: 'Kisah legenda Sangkuriang dan Dayang Sumbi yang menciptakan Gunung Tangkuban Perahu dalam semalam.'
+        description: 'Kisah legenda Sangkuriang dan Dayang Sumbi yang menciptakan Gunung Tangkuban Perahu dalam semalam.',
+        full_story: `Dahulu kala, hiduplah seorang putri cantik bernama Dayang Sumbi. Suatu hari, ia menjatuhkan alat tenunnya dan bersumpah akan menikahi siapa saja yang mengambilkannya. Seekor anjing bernama Tumang mengambilkan alat tersebut, dan Dayang Sumbi harus menepati sumpahnya.
+
+Dari pernikahan tersebut, lahirlah seorang anak laki-laki bernama Sangkuriang. Ia tumbuh menjadi pemuda yang gagah dan suka berburu. Suatu hari, saat berburu bersama Tumang, Sangkuriang menjadi marah karena tidak mendapat buruan dan membunuh Tumang.
+
+Ketika mengetahui hal ini, Dayang Sumbi sangat marah dan memukul kepala Sangkuriang hingga luka. Sangkuriang pergi meninggalkan ibunya dan mengembara selama bertahun-tahun.
+
+Bertahun-tahun kemudian, Sangkuriang kembali ke kampung halamannya dan bertemu dengan seorang wanita cantik yang tak lain adalah ibunya sendiri. Karena kesaktiannya, Dayang Sumbi tetap terlihat muda. Mereka saling jatuh cinta dan berencana menikah.
+
+Menjelang pernikahan, Dayang Sumbi menyadari bahwa calon suaminya adalah anaknya sendiri dari bekas luka di kepala Sangkuriang. Untuk menggagalkan pernikahan, ia memberikan syarat yang mustahil: Sangkuriang harus membuat sebuah perahu dan bendungan dalam waktu satu malam.
+
+Dengan kesaktiannya, Sangkuriang hampir berhasil menyelesaikan tugas tersebut. Dayang Sumbi panik dan meminta penduduk menumbuk lesung agar ayam jantan berkokok. Sangkuriang mengira matahari akan terbit dan menendang perahu yang belum selesai. Perahu itu terbalik dan menjadi Gunung Tangkuban Perahu.`
     },
     {
         id: 2,
         title: 'Cerita Malin Kundang',
+        author: 'Anda',
         location: 'Padang, Sumatera Barat',
         date: '10 Des 2024',
-        description: 'Legenda tentang anak durhaka yang dikutuk menjadi batu karena tidak mengakui ibunya sendiri.'
+        description: 'Legenda tentang anak durhaka yang dikutuk menjadi batu karena tidak mengakui ibunya sendiri.',
+        full_story: `Malin Kundang adalah seorang anak laki-laki yang hidup bersama ibunya di sebuah desa nelayan miskin. Ayahnya telah meninggal saat melaut ketika Malin masih kecil.
+
+Suatu hari, Malin memutuskan untuk pergi merantau mencari kehidupan yang lebih baik. Dengan berat hati, ibunya melepas kepergian Malin dengan harapan suatu hari ia akan kembali sebagai orang sukses.
+
+Di tanah perantauan, Malin bekerja keras dan beruntung bertemu dengan seorang saudagar kaya yang tidak memiliki anak. Ia diangkat sebagai anak dan mewarisi semua harta saudagar tersebut. Malin menikah dengan putri saudagar yang cantik jelita.
+
+Bertahun-tahun kemudian, Malin berlayar kembali ke kampung halamannya dengan kapal mewah. Ibunya yang sudah tua mendengar kabar kedatangan kapal besar dan berlari ke pelabuhan. Dengan air mata, ia memeluk Malin yang sudah tidak dikenalinya.
+
+Namun Malin, yang malu dengan ibu tuanya yang kumuh di depan istri cantiknya, mengusir ibunya dengan kasar. Ia bahkan tidak mengakui bahwa wanita tua itu adalah ibunya.
+
+Hati ibu Malin hancur berkeping-keping. Dengan penuh kesedihan, ia mengangkat tangannya ke langit dan berdoa agar Malin mendapat balasan atas perbuatannya. Tiba-tiba langit menjadi gelap, angin bertiup kencang, dan badai besar menghantam kapal Malin.
+
+Malin Kundang berubah menjadi batu di tepi pantai, menjadi pengingat abadi tentang akibat durhaka kepada orang tua.`
     },
     {
         id: 3,
         title: 'Batu Menangis',
+        author: 'Anda',
         location: 'Kalimantan Barat',
         date: '5 Des 2024',
-        description: 'Kisah seorang anak perempuan yang durhaka kepada ibunya dan dikutuk menjadi batu yang menangis.'
+        description: 'Kisah seorang anak perempuan yang durhaka kepada ibunya dan dikutuk menjadi batu yang menangis.',
+        full_story: `Di sebuah desa di Kalimantan, hiduplah seorang janda miskin bersama putrinya yang cantik jelita. Sang ibu bekerja keras sebagai petani untuk membesarkan anaknya sendirian.
+
+Putrinya tumbuh menjadi gadis yang sangat cantik, namun sombong dan tidak menghargai ibunya. Ia malu memiliki ibu yang miskin dan berkulit hitam karena bekerja di bawah terik matahari.
+
+Suatu hari, ada pesta besar di desa sebelah. Sang putri berdandan dengan sangat cantik dan meminta ibunya untuk tidak ikut. Namun sang ibu tetap ingin menemani anaknya.
+
+Di tengah perjalanan, setiap kali ada orang yang bertanya siapa wanita tua yang bersamanya, si gadis selalu menjawab bahwa itu adalah pembantunya, bukan ibunya. Berkali-kali ia melakukan hal yang sama.
+
+Hati sang ibu sangat terluka mendengar pengakuan anaknya. Dengan air mata, ia berdoa kepada Tuhan agar anaknya mendapat pelajaran.
+
+Tiba-tiba hujan deras turun dan petir menyambar. Kaki si gadis mulai membatu, perlahan naik ke tubuhnya. Ia menangis memohon ampun kepada ibunya, tetapi sudah terlambat.
+
+Tubuh gadis cantik itu berubah menjadi batu. Hingga kini, batu tersebut masih ada dan selalu mengeluarkan air seperti air mata, seolah-olah terus menangis menyesali perbuatannya.`
     }
 ]);
 
@@ -153,13 +226,17 @@ const editForm = ref({
     id: null,
     title: '',
     location: '',
-    description: ''
+    description: '',
+    full_story: ''
 });
 
 const closeModal = () => {
     document.getElementById('my_stories_modal').close();
-    isEditMode.value = false;
-    errorMessage.value = '';
+    setTimeout(() => {
+        isEditMode.value = false;
+        selectedStory.value = null;
+        errorMessage.value = '';
+    }, 200);
 };
 
 const switchToEdit = (story) => {
@@ -167,9 +244,11 @@ const switchToEdit = (story) => {
         id: story.id,
         title: story.title,
         location: story.location,
-        description: story.description
+        description: story.description,
+        full_story: story.full_story
     };
     isEditMode.value = true;
+    selectedStory.value = null;
     errorMessage.value = '';
 };
 
@@ -180,7 +259,8 @@ const cancelEdit = () => {
         id: null,
         title: '',
         location: '',
-        description: ''
+        description: '',
+        full_story: ''
     };
 };
 
@@ -202,6 +282,11 @@ const submitEdit = () => {
         return;
     }
 
+    if (!editForm.value.full_story.trim()) {
+        errorMessage.value = 'Cerita lengkap harus diisi';
+        return;
+    }
+
     submitting.value = true;
 
     setTimeout(() => {
@@ -212,14 +297,18 @@ const submitEdit = () => {
 };
 
 const handleDelete = (story) => {
-    if (deleteModalRef.value) {
-        deleteModalRef.value.openModal(story);
+    if (confirm(`Yakin ingin menghapus cerita "${story.title}"?`)) {
+        alert(`Cerita "${story.title}" berhasil dihapus! (dummy)`);
     }
 };
 
 const openStoryDetail = (story) => {
-    console.log('Membuka detail cerita saya:', story);
-    alert(`Membuka cerita saya: "${story.title}"\n\nLokasi: ${story.location}\nTanggal: ${story.date}\n\nDeskripsi: ${story.description}`);
+    selectedStory.value = story;
+    isEditMode.value = false;
+};
+
+const backToList = () => {
+    selectedStory.value = null;
 };
 </script>
 
