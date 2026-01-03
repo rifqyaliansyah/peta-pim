@@ -17,6 +17,24 @@
                     </label>
                 </div>
                 <div class="flex-1 px-4 font-bold">Peta-Pim</div>
+
+                <div class="flex-none mr-2">
+                    <div class="dropdown dropdown-end">
+                        <button tabindex="0" class="btn btn-square btn-ghost">
+                            <Palette class="size-5" />
+                        </button>
+                        <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 rounded-box shadow w-44 mt-2">
+                            <li v-for="theme in themes" :key="theme">
+                                <button @click="selectTheme(theme)" :class="{
+                                    'active': currentTheme === theme,
+                                    'font-semibold': currentTheme === theme
+                                }">
+                                    {{ themeLabel(theme) }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </nav>
         </div>
 
@@ -98,11 +116,34 @@
 </template>
 
 <script setup>
-import { MapPinPlus, Book, User, BookOpen, MapPin } from 'lucide-vue-next';
+import { MapPinPlus, Book, User, BookOpen, Palette, MapPin } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
+import { ref, onMounted } from 'vue';
 
 const addStoryModalRef = ref(null);
 const { startAddMode } = useAddStoryMode();
+
+const themes = ['light', 'dark', 'coffee', 'cmyk', 'valentine', 'luxury'];
+const currentTheme = ref('cmyk');
+
+const selectTheme = (theme) => {
+    currentTheme.value = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+};
+
+const themeLabel = (theme) => {
+    if (theme === 'cmyk') return 'Cmyk (Default)';
+    return theme.charAt(0).toUpperCase() + theme.slice(1);
+};
+
+onMounted(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        currentTheme.value = saved;
+        document.documentElement.setAttribute('data-theme', saved);
+    }
+});
 
 const openModal = (modalId) => {
     document.getElementById(modalId).showModal();
