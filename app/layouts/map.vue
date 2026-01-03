@@ -43,7 +43,8 @@
 
                 <ul class="menu w-full grow">
                     <li>
-                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Jelajahi Peta">
+                        <button @click="closeDrawer" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                            data-tip="Jelajahi Peta">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
                                 stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
                                 class="my-1.5 inline-block size-4">
@@ -64,7 +65,7 @@
                     </li>
 
                     <li>
-                        <button
+                        <button @click="openModal('all_stories_modal')"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Semua Cerita">
                             <BookOpen class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Semua Cerita</span>
@@ -72,14 +73,15 @@
                     </li>
 
                     <li>
-                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Cerita Saya">
+                        <button @click="openModal('my_stories_modal')"
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Cerita Saya">
                             <Book class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Cerita Saya</span>
                         </button>
                     </li>
 
                     <li>
-                        <button
+                        <button @click="openModal('auth_modal')"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Login">
                             <User class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Login</span>
@@ -91,11 +93,11 @@
                     <div class="text-xs opacity-60 space-y-1">
                         <div class="flex justify-between">
                             <span>Total Cerita</span>
-                            <span class="font-semibold">0</span>
+                            <span class="font-semibold">8</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Kontributor</span>
-                            <span class="font-semibold">0</span>
+                            <span class="font-semibold">5</span>
                         </div>
                     </div>
                 </div>
@@ -106,10 +108,25 @@
     <div class="map-fullscreen">
         <slot />
     </div>
+
+    <AuthModal />
+    <MyStoriesModal />
+    <AllStoriesModal />
 </template>
 
 <script setup>
 import { MapPinPlus, Book, User, BookOpen } from 'lucide-vue-next';
+
+const openModal = (modalId) => {
+    document.getElementById(modalId).showModal();
+};
+
+const closeDrawer = () => {
+    const drawerCheckbox = document.getElementById('my-drawer-4');
+    if (drawerCheckbox) {
+        drawerCheckbox.checked = false;
+    }
+};
 </script>
 
 <style scoped>
