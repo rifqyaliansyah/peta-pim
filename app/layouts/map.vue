@@ -39,8 +39,8 @@
                     </li>
 
                     <li>
-                        <button @click="startAddMode" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                            data-tip="Tambah Cerita">
+                        <button @click="startAddModeHandler"
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tambah Cerita">
                             <MapPinPlus class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Tambah Cerita</span>
                         </button>
