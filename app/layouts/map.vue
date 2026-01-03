@@ -4,51 +4,101 @@
 
         <div class="drawer-content">
             <nav class="navbar w-full bg-base-300 relative z-[999]">
-                <label for="my-drawer-4" aria-label="open sidebar" class="btn btn-square btn-ghost">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
-                        stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
-                        class="my-1.5 inline-block size-4">
-                        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z">
-                        </path>
-                        <path d="M9 4v16"></path>
-                        <path d="M14 10l2 2l-2 2"></path>
-                    </svg>
-                </label>
-                <div class="px-4">Peta-Pim</div>
+                <div class="flex-none">
+                    <label for="my-drawer-4" aria-label="open sidebar" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
+                            stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
+                            class="my-1.5 inline-block size-4">
+                            <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z">
+                            </path>
+                            <path d="M9 4v16"></path>
+                            <path d="M14 10l2 2l-2 2"></path>
+                        </svg>
+                    </label>
+                </div>
+                <div class="flex-1 px-4 font-bold">Peta-Pim</div>
+                <div class="flex-none gap-2">
+                    <label class="input input-sm hidden lg:flex items-center gap-2">
+                        <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none"
+                                stroke="currentColor">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </g>
+                        </svg>
+                        <input type="search" class="grow w-32 lg:w-48" placeholder="Cari cerita..." />
+                    </label>
+                </div>
             </nav>
         </div>
 
         <div class="drawer-side is-drawer-close:overflow-visible z-[1001]">
             <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
             <div class="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+
+                <div class="p-4 w-full border-b border-base-300 is-drawer-close:hidden">
+                    <h2 class="font-bold text-lg">Peta-Pim</h2>
+                    <p class="text-xs opacity-60">Cerita nusantara</p>
+                </div>
+
                 <ul class="menu w-full grow">
                     <li>
-                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Homepage">
+                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Jelajahi Peta">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
                                 stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
                                 class="my-1.5 inline-block size-4">
-                                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                                <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
                                 <path
-                                    d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
+                                    d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z">
                                 </path>
                             </svg>
-                            <span class="is-drawer-close:hidden">Homepage</span>
+                            <span class="is-drawer-close:hidden">Jelajahi Peta</span>
                         </button>
                     </li>
+
                     <li>
-                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Settings">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round"
-                                stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"
-                                class="my-1.5 inline-block size-4">
-                                <path d="M20 7h-9"></path>
-                                <path d="M14 17H5"></path>
-                                <circle cx="17" cy="17" r="3"></circle>
-                                <circle cx="7" cy="7" r="3"></circle>
-                            </svg>
-                            <span class="is-drawer-close:hidden">Settings</span>
+                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tambah Cerita">
+                            <MapPinPlus class="my-1.5 inline-block size-4" />
+                            <span class="is-drawer-close:hidden">Tambah Cerita</span>
+                        </button>
+                    </li>
+
+                    <li>
+                        <button
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Semua Cerita">
+                            <BookOpen class="my-1.5 inline-block size-4" />
+                            <span class="is-drawer-close:hidden">Semua Cerita</span>
+                        </button>
+                    </li>
+
+                    <li>
+                        <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Cerita Saya">
+                            <Book class="my-1.5 inline-block size-4" />
+                            <span class="is-drawer-close:hidden">Cerita Saya</span>
+                        </button>
+                    </li>
+
+                    <li>
+                        <button
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Login">
+                            <User class="my-1.5 inline-block size-4" />
+                            <span class="is-drawer-close:hidden">Login</span>
                         </button>
                     </li>
                 </ul>
+
+                <div class="p-4 w-full border-t border-base-300 is-drawer-close:hidden">
+                    <div class="text-xs opacity-60 space-y-1">
+                        <div class="flex justify-between">
+                            <span>Total Cerita</span>
+                            <span class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Kontributor</span>
+                            <span class="font-semibold">0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -57,6 +107,10 @@
         <slot />
     </div>
 </template>
+
+<script setup>
+import { MapPinPlus, Book, User, BookOpen } from 'lucide-vue-next';
+</script>
 
 <style scoped>
 .map-fullscreen {

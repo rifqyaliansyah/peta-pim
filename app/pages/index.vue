@@ -42,4 +42,14 @@ const updateMarkerPosition = (event) => {
     width: 100%;
     height: 100%;
 }
+
+:deep(.leaflet-control-zoom) {
+    margin-left: 0 !important;
+    margin-right: 10px !important;
+}
+
+:deep(.leaflet-left) {
+    left: auto !important;
+    right: 0 !important;
+}
 </style>
