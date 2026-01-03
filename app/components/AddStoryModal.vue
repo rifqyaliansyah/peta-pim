@@ -25,7 +25,7 @@
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-sm">Koordinat: {{ coordinates.lat.toFixed(6) }}, {{ coordinates.lng.toFixed(6)
-                    }}</span>
+                        }}</span>
                 </div>
                 <div class="form-control">
                     <label class="label">
@@ -45,12 +45,23 @@
 
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text font-semibold mb-1">Deskripsi</span>
+                        <span class="label-text font-semibold mb-1">Deskripsi Singkat</span>
                     </label>
-                    <textarea v-model="form.description" placeholder="Ceritakan kisah atau legenda ini..."
-                        class="textarea textarea-bordered h-32 w-full"></textarea>
+                    <textarea v-model="form.description" placeholder="Deskripsi singkat cerita..."
+                        class="textarea textarea-bordered h-24 w-full"></textarea>
                     <label class="label">
                         <span class="label-text-alt opacity-60">{{ form.description.length }} karakter</span>
+                    </label>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Cerita Lengkap</span>
+                    </label>
+                    <textarea v-model="form.full_story" placeholder="Tulis cerita lengkap di sini..."
+                        class="textarea textarea-bordered h-64 w-full"></textarea>
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">{{ form.full_story.length }} karakter</span>
                     </label>
                 </div>
             </div>
@@ -82,7 +93,8 @@ const coordinates = ref({ lat: 0, lng: 0 });
 const form = ref({
     title: '',
     location: '',
-    description: ''
+    description: '',
+    full_story: ''
 });
 
 const openModal = (coords) => {
@@ -90,7 +102,8 @@ const openModal = (coords) => {
     form.value = {
         title: '',
         location: '',
-        description: ''
+        description: '',
+        full_story: ''
     };
     errorMessage.value = '';
     document.getElementById('add_story_modal').showModal();
@@ -115,7 +128,12 @@ const submitForm = () => {
     }
 
     if (!form.value.description.trim()) {
-        errorMessage.value = 'Deskripsi harus diisi';
+        errorMessage.value = 'Deskripsi singkat harus diisi';
+        return;
+    }
+
+    if (!form.value.full_story.trim()) {
+        errorMessage.value = 'Cerita lengkap harus diisi';
         return;
     }
 
