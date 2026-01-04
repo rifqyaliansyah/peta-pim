@@ -21,16 +21,16 @@
             </div>
 
             <!-- Error Alert -->
-            <div v-if="nameError && !successMessage" class="alert alert-error mb-4">
+            <div v-if="errorMessage && !successMessage" class="alert alert-error mb-4">
                 <div class="flex items-center gap-2 w-full">
-                    <button @click="nameError = ''" class="p-0 bg-transparent border-none cursor-pointer">
+                    <button @click="clearError" class="p-0 bg-transparent border-none cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </button>
-                    <span class="flex-1">{{ nameError }}</span>
+                    <span class="flex-1">{{ errorMessage }}</span>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                             <span class="label-text font-semibold mb-1">Nama</span>
                         </label>
                         <input type="text" v-model="editableName" class="input input-bordered w-full"
-                            :class="{ 'input-error': nameError }" @input="clearError" />
+                            :class="{ 'input-error': errorMessage }" @input="clearError" />
                     </div>
 
                     <div class="form-control">
@@ -88,20 +88,24 @@
                         <label class="label">
                             <span class="label-text font-semibold mb-1">Password Lama</span>
                         </label>
-                        <input type="password" class="input input-bordered w-full" />
+                        <input type="password" v-model="oldPassword" placeholder="Kosongkan jika tidak ingin mengganti"
+                            class="input input-bordered w-full" :class="{ 'input-error': errorMessage }"
+                            @input="clearError" />
                     </div>
 
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold mb-1">Password Baru</span>
                         </label>
-                        <input type="password" class="input input-bordered w-full" />
+                        <input type="password" v-model="newPassword" placeholder="Minimal 6 karakter"
+                            class="input input-bordered w-full" :class="{ 'input-error': errorMessage }"
+                            @input="clearError" />
                     </div>
                 </div>
 
                 <div class="space-y-2 pt-4">
                     <button @click="handleUpdateProfile" class="btn btn-primary w-full"
-                        :disabled="isUpdating || !hasNameChanged">
+                        :disabled="isUpdating || !hasChanges">
                         <span v-if="isUpdating" class="loading loading-spinner loading-sm"></span>
                         {{ isUpdating ? 'Menyimpan...' : 'Simpan' }}
                     </button>
@@ -123,7 +127,9 @@ import { useAuthStore } from '~/stores/auth';
 const authStore = useAuthStore();
 
 const editableName = ref('');
-const nameError = ref('');
+const oldPassword = ref('');
+const newPassword = ref('');
+const errorMessage = ref('');
 const successMessage = ref('');
 const isUpdating = ref(false);
 const isLoadingProfile = ref(false);
@@ -136,8 +142,10 @@ watch(() => authStore.user?.name, (newName) => {
     }
 }, { immediate: true });
 
-const hasNameChanged = computed(() => {
-    return editableName.value !== authStore.user?.name && editableName.value.trim().length > 0;
+const hasChanges = computed(() => {
+    const nameChanged = editableName.value !== authStore.user?.name && editableName.value.trim().length > 0;
+    const passwordFilled = oldPassword.value || newPassword.value;
+    return nameChanged || passwordFilled;
 });
 
 const joinDate = computed(() => {
@@ -159,7 +167,7 @@ const joinDate = computed(() => {
 });
 
 const clearError = () => {
-    nameError.value = '';
+    errorMessage.value = '';
     successMessage.value = '';
 };
 
@@ -208,28 +216,47 @@ if (process.client) {
 
 const handleUpdateProfile = async () => {
     if (!editableName.value || editableName.value.trim().length === 0) {
-        nameError.value = 'Nama tidak boleh kosong';
+        errorMessage.value = 'Nama tidak boleh kosong';
         return;
     }
 
     if (editableName.value.trim().length < 3) {
-        nameError.value = 'Nama minimal 3 karakter';
+        errorMessage.value = 'Nama minimal 3 karakter';
         return;
+    }
+
+    if (oldPassword.value || newPassword.value) {
+        if (!oldPassword.value || !newPassword.value) {
+            errorMessage.value = 'Password lama dan password baru harus diisi';
+            return;
+        }
+
+        if (newPassword.value.length < 6) {
+            errorMessage.value = 'Password baru minimal 6 karakter';
+            return;
+        }
     }
 
     isUpdating.value = true;
     clearError();
 
     try {
-        await authStore.updateProfile(editableName.value.trim());
-        successMessage.value = 'Profile berhasil diperbarui!';
+        await authStore.updateProfile(
+            editableName.value.trim(),
+            oldPassword.value || null,
+            newPassword.value || null
+        );
+
+        successMessage.value = oldPassword.value
+            ? 'Profile dan password berhasil diperbarui!'
+            : 'Profile berhasil diperbarui!';
 
         setTimeout(() => {
             successMessage.value = '';
             closeModal();
         }, 1000);
     } catch (error) {
-        nameError.value = error.message || 'Gagal memperbarui profile';
+        errorMessage.value = error.message || 'Gagal memperbarui profile';
     } finally {
         isUpdating.value = false;
     }
@@ -237,6 +264,8 @@ const handleUpdateProfile = async () => {
 
 const closeModal = () => {
     editableName.value = authStore.user?.name || '';
+    oldPassword.value = '';
+    newPassword.value = '';
     clearError();
     document.getElementById('profile_modal').close();
 };

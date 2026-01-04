@@ -64,10 +64,17 @@ export const authService = {
         });
     },
 
-    async updateProfile(name) {
+    async updateProfile(name, oldPassword = null, newPassword = null) {
+        const body = { name };
+
+        if (oldPassword && newPassword) {
+            body.oldPassword = oldPassword;
+            body.newPassword = newPassword;
+        }
+
         return await this.authenticatedRequest('/auth/profile', {
             method: 'PUT',
-            body: JSON.stringify({ name })
+            body: JSON.stringify(body)
         });
     },
 
