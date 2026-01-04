@@ -105,7 +105,7 @@
                             <span class="font-semibold">{{ stats.total_stories }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span>Kontributor</span>
+                            <span>Total Pengguna</span>
                             <span class="font-semibold">{{ stats.total_users }}</span>
                         </div>
                     </div>
