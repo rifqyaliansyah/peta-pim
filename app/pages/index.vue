@@ -154,8 +154,8 @@
     </dialog>
 
     <AddStoryModal ref="addStoryModalRef" @submit="handleStorySubmit" />
-    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" @viewOnMap="handleViewOnMap" />
-    <AllStoriesModal @viewOnMap="handleViewOnMap" />
+    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" @viewOnMap="handleViewOnMap" @closeDrawer="closeDrawer" />
+    <AllStoriesModal @viewOnMap="handleViewOnMap" @closeDrawer="closeDrawer" />
 </template>
 
 <script setup>
@@ -342,6 +342,13 @@ const handleStoryDelete = async () => {
 
     if (selectedStory.value) {
         closeDetailModal();
+    }
+};
+
+const closeDrawer = () => {
+    const drawerCheckbox = document.getElementById('my-drawer-4');
+    if (drawerCheckbox) {
+        drawerCheckbox.checked = false;
     }
 };
 </script>
