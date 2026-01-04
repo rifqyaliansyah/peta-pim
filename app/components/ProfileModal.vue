@@ -95,13 +95,28 @@ const hasNameChanged = computed(() => {
 });
 
 const joinDate = computed(() => {
-    if (!authStore.user?.created_at) return '-';
-    const date = new Date(authStore.user.created_at);
-    return date.toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    if (!authStore.user?.created_at) {
+        console.log('created_at kosong:', authStore.user);
+        return '-';
+    }
+
+    try {
+        const date = new Date(authStore.user.created_at);
+
+        if (isNaN(date.getTime())) {
+            console.log('Invalid date:', authStore.user.created_at);
+            return '-';
+        }
+
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    } catch (error) {
+        console.error('Error parsing date:', error);
+        return '-';
+    }
 });
 
 const fetchTotalStories = async () => {

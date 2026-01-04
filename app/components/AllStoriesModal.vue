@@ -2,12 +2,13 @@
     <dialog id="all_stories_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box max-w-4xl flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between mb-6 shrink-0">
-                <div>
-                    <h3 class="text-xl font-bold">{{ selectedStory ? selectedStory.title : 'Semua Cerita' }}</h3>
+                <div class="flex-1 pr-4 min-w-0">
+                    <h3 class="text-xl font-bold break-words" style="word-break: break-word;">{{ selectedStory ?
+                        selectedStory.title : 'Semua Cerita' }}</h3>
                     <p v-if="!selectedStory" class="text-sm opacity-60 mt-1">{{ filteredStories.length }} cerita dari
                         komunitas</p>
                 </div>
-                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
+                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost shrink-0">
                     <X :size="20" />
                 </button>
             </div>
@@ -52,26 +53,27 @@
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
-                                        <h4 class="font-bold text-base line-clamp-1 flex-1 min-w-0">{{ story.title }}
+                                        <h4 class="font-bold text-base line-clamp-1 flex-1 min-w-0 break-words">{{
+                                            story.title }}
                                         </h4>
                                         <span class="badge badge-sm badge-ghost shrink-0">{{ story.author?.name ||
                                             'Anonim' }}</span>
                                     </div>
                                     <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
                                         <div class="flex items-center gap-1">
-                                            <MapPin :size="14" />
-                                            <span>{{ story.location }}</span>
+                                            <MapPin :size="14" class="shrink-0" />
+                                            <span class="break-words">{{ story.location }}</span>
                                         </div>
                                         <div class="flex items-center gap-1">
-                                            <Calendar :size="14" />
+                                            <Calendar :size="14" class="shrink-0" />
                                             <span>{{ formatDate(story.created_at) }}</span>
                                         </div>
                                         <div class="flex items-center gap-1">
-                                            <Eye :size="14" />
+                                            <Eye :size="14" class="shrink-0" />
                                             <span>{{ story.views_count || 0 }} views</span>
                                         </div>
                                     </div>
-                                    <p class="text-sm opacity-80 line-clamp-2">{{ story.description }}</p>
+                                    <p class="text-sm opacity-80 line-clamp-2 break-words">{{ story.description }}</p>
                                 </div>
                             </div>
                         </div>
@@ -88,7 +90,7 @@
                         </div>
                         <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
                             <MapPin :size="16" />
-                            <span>{{ selectedStory.location }}</span>
+                            <span class="break-words">{{ selectedStory.location }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm opacity-70">
                             <Eye :size="16" />
@@ -99,7 +101,8 @@
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
-                        <p class="text-base leading-relaxed whitespace-pre-line">{{ selectedStory.full_story }}</p>
+                        <p class="text-base leading-relaxed whitespace-pre-line break-words">{{ selectedStory.full_story
+                            }}</p>
                     </div>
                 </div>
             </div>
