@@ -41,7 +41,7 @@
                         <span class="label-text font-semibold mb-1">Email</span>
                     </label>
                     <input v-model="loginForm.email" type="email" placeholder="Email anda"
-                        class="input input-bordered w-full" @input="clearError" />
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleLogin" />
                 </div>
 
                 <div class="form-control">
@@ -49,7 +49,7 @@
                         <span class="label-text font-semibold mb-1">Password</span>
                     </label>
                     <input v-model="loginForm.password" type="password" placeholder="Password anda"
-                        class="input input-bordered w-full" @input="clearError" />
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleLogin" />
                 </div>
 
                 <div class="form-control mt-6">
@@ -100,7 +100,7 @@
                         <span class="label-text font-semibold mb-1">Confirm Password</span>
                     </label>
                     <input v-model="registerForm.confirmPassword" type="password" placeholder="Ulangi password"
-                        class="input input-bordered w-full" @input="clearError" />
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleRegister" />
                 </div>
 
                 <div class="form-control mt-6">
@@ -126,6 +126,10 @@
 <script setup>
 import { ref } from 'vue';
 import { X } from 'lucide-vue-next';
+import { useAuthStore } from '~/stores/auth';
+import { authService } from '~/services/authService';
+
+const authStore = useAuthStore();
 
 const isLoginMode = ref(true);
 const submitting = ref(false);
@@ -159,7 +163,7 @@ const showSuccess = (message) => {
     successMessage.value = message;
     setTimeout(() => {
         closeModal();
-    }, 1000);
+    }, 1500);
 };
 
 const closeModal = () => {
@@ -171,7 +175,7 @@ const closeModal = () => {
     registerForm.value = { name: '', email: '', password: '', confirmPassword: '' };
 };
 
-const handleLogin = () => {
+const handleLogin = async () => {
     clearError();
 
     if (!loginForm.value.email || !loginForm.value.password) {
@@ -181,13 +185,23 @@ const handleLogin = () => {
 
     submitting.value = true;
 
-    setTimeout(() => {
-        submitting.value = false;
+    try {
+        const response = await authService.login({
+            email: loginForm.value.email,
+            password: loginForm.value.password
+        });
+
+        authStore.setAuth(response.data);
+
         showSuccess('Login berhasil!');
-    }, 1000);
+    } catch (error) {
+        errorMessage.value = error.message || 'Login gagal. Silakan coba lagi.';
+    } finally {
+        submitting.value = false;
+    }
 };
 
-const handleRegister = () => {
+const handleRegister = async () => {
     clearError();
 
     if (!registerForm.value.name || !registerForm.value.email ||
@@ -208,10 +222,21 @@ const handleRegister = () => {
 
     submitting.value = true;
 
-    setTimeout(() => {
-        submitting.value = false;
+    try {
+        const response = await authService.register({
+            name: registerForm.value.name,
+            email: registerForm.value.email,
+            password: registerForm.value.password
+        });
+
+        authStore.setAuth(response.data);
+
         showSuccess('Registrasi berhasil!');
-    }, 1000);
+    } catch (error) {
+        errorMessage.value = error.message || 'Registrasi gagal. Silakan coba lagi.';
+    } finally {
+        submitting.value = false;
+    }
 };
 </script>
 

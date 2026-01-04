@@ -56,7 +56,7 @@
                         </button>
                     </li>
 
-                    <li>
+                    <li v-if="authStore.isAuthenticated">
                         <button @click="startAddModeHandler"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Tambah Cerita">
                             <MapPinPlus class="my-1.5 inline-block size-4" />
@@ -72,7 +72,7 @@
                         </button>
                     </li>
 
-                    <li>
+                    <li v-if="authStore.isAuthenticated">
                         <button @click="openModal('my_stories_modal')"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Cerita Saya">
                             <Book class="my-1.5 inline-block size-4" />
@@ -80,11 +80,19 @@
                         </button>
                     </li>
 
-                    <li>
+                    <li v-if="!authStore.isAuthenticated">
                         <button @click="openModal('auth_modal')"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Login">
                             <User class="my-1.5 inline-block size-4" />
                             <span class="is-drawer-close:hidden">Login</span>
+                        </button>
+                    </li>
+
+                    <li v-if="authStore.isAuthenticated">
+                        <button @click="openProfileModal" class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                            data-tip="Profile">
+                            <User class="my-1.5 inline-block size-4" />
+                            <span class="is-drawer-close:hidden">Profile</span>
                         </button>
                     </li>
                 </ul>
@@ -113,13 +121,16 @@
     <MyStoriesModal />
     <AllStoriesModal />
     <AddStoryModal ref="addStoryModalRef" @submit="handleAddStorySubmit" />
+    <ProfileModal v-if="authStore.isAuthenticated" />
 </template>
 
 <script setup>
 import { MapPinPlus, Book, User, BookOpen, Palette, MapPin } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
+import { useAuthStore } from '~/stores/auth';
 import { ref, onMounted } from 'vue';
 
+const authStore = useAuthStore();
 const addStoryModalRef = ref(null);
 const { startAddMode } = useAddStoryMode();
 
@@ -147,6 +158,10 @@ onMounted(() => {
 
 const openModal = (modalId) => {
     document.getElementById(modalId).showModal();
+};
+
+const openProfileModal = () => {
+    openModal('profile_modal');
 };
 
 const closeDrawer = () => {

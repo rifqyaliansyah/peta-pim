@@ -5,8 +5,15 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
-    '@nuxtjs/leaflet'
+    '@pinia/nuxt',
+    '@nuxtjs/leaflet',
   ],
+
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'
+    }
+  },
 
   vite: {
     plugins: [tailwindcss()],
