@@ -6,7 +6,7 @@
                     <h3 class="text-xl font-bold break-words" style="word-break: break-word;">{{ selectedStory ?
                         selectedStory.title : 'Semua Cerita' }}</h3>
                     <p v-if="!selectedStory" class="text-sm opacity-60 mt-1">{{ filteredStories.length }} cerita dari
-                        komunitas</p>
+                        pengguna lain</p>
                 </div>
                 <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost shrink-0">
                     <X :size="20" />
@@ -96,6 +96,7 @@
                             <Eye :size="16" class="shrink-0 mt-0.5" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
+                        <p class="text-sm opacity-80 line-clamp-2 break-words mt-2">{{ selectedStory.description }}</p>
                     </div>
 
                     <div class="divider"></div>

@@ -103,6 +103,8 @@
                             <Eye :size="16" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
+
+                        <p class="text-sm opacity-80 line-clamp-2 break-words mt-2">{{ selectedStory.description }}</p>
                     </div>
 
                     <div class="divider"></div>
