@@ -72,6 +72,7 @@
                         </button>
                     </li>
 
+
                     <li v-if="authStore.isAuthenticated">
                         <button @click="openModal('my_stories_modal')"
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Cerita Saya">
@@ -101,11 +102,11 @@
                     <div class="text-xs opacity-60 space-y-1">
                         <div class="flex justify-between">
                             <span>Total Cerita</span>
-                            <span class="font-semibold">8</span>
+                            <span class="font-semibold">{{ stats.total_stories }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Kontributor</span>
-                            <span class="font-semibold">5</span>
+                            <span class="font-semibold">{{ stats.total_users }}</span>
                         </div>
                     </div>
                 </div>
@@ -128,11 +129,17 @@
 import { MapPinPlus, Book, User, BookOpen, Palette, MapPin } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
 import { useAuthStore } from '~/stores/auth';
+import { storyService } from '~/services/storyService';
 import { ref, onMounted } from 'vue';
 
 const authStore = useAuthStore();
 const addStoryModalRef = ref(null);
 const { startAddMode } = useAddStoryMode();
+
+const stats = ref({
+    total_stories: 0,
+    total_users: 0
+});
 
 const themes = ['light', 'dark', 'coffee', 'cmyk', 'valentine', 'luxury'];
 const currentTheme = ref('cmyk');
@@ -154,7 +161,20 @@ onMounted(() => {
         currentTheme.value = saved;
         document.documentElement.setAttribute('data-theme', saved);
     }
+
+    fetchStats();
 });
+
+const fetchStats = async () => {
+    try {
+        const response = await storyService.getStats();
+        if (response.success && response.data) {
+            stats.value = response.data;
+        }
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+    }
+};
 
 const openModal = (modalId) => {
     document.getElementById(modalId).showModal();
