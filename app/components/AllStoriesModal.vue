@@ -15,7 +15,7 @@
 
             <div v-if="!selectedStory" class="mb-4 shrink-0">
                 <div class="relative">
-                    <input v-model="searchQuery" type="search" placeholder="Cari judul, lokasi, atau penulis..."
+                    <input v-model="searchQuery" type="text" placeholder="Cari judul, lokasi, atau penulis..."
                         class="input input-bordered w-full pr-10" />
                     <Search v-if="!searchQuery" class="absolute right-3 top-1/2 -translate-y-1/2 opacity-40"
                         :size="20" />
@@ -60,16 +60,16 @@
                                             'Anonim' }}</span>
                                     </div>
                                     <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
-                                        <div class="flex items-center gap-1">
-                                            <MapPin :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <MapPin :size="14" class="shrink-0 mt-0.5" />
                                             <span class="break-words">{{ story.location }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Calendar :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <Calendar :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ formatDate(story.created_at) }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Eye :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <Eye :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ story.views_count || 0 }} views</span>
                                         </div>
                                     </div>
@@ -88,12 +88,12 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span class="break-words">{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70">
-                            <Eye :size="16" />
+                        <div class="flex items-start gap-2 text-sm opacity-70">
+                            <Eye :size="16" class="shrink-0 mt-0.5" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
                     </div>

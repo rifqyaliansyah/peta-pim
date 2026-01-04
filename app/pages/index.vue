@@ -86,9 +86,9 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span class="wrap-break-word">{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm opacity-70">
                             <Eye :size="16" />

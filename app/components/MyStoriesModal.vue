@@ -66,16 +66,16 @@
                                         {{ story.title }}
                                     </h4>
                                     <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
-                                        <div class="flex items-center gap-1">
-                                            <MapPin :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <MapPin :size="14" class="shrink-0 mt-0.5" />
                                             <span class="break-words">{{ story.location }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Calendar :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <Calendar :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ formatDate(story.created_at) }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Eye :size="14" class="shrink-0" />
+                                        <div class="flex items-start gap-1">
+                                            <Eye :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ story.views_count || 0 }} views</span>
                                         </div>
                                     </div>
@@ -150,12 +150,12 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span class="break-words">{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70">
-                            <Eye :size="16" />
+                        <div class="flex items-start gap-2 text-sm opacity-70">
+                            <Eye :size="16" class="shrink-0 mt-0.5" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
                     </div>
@@ -219,8 +219,8 @@
                         <div class="flex gap-3 items-start">
                             <div class="min-w-0 flex-1">
                                 <p class="font-bold break-words">{{ storyToDelete.title }}</p>
-                                <div class="flex items-center gap-1 text-sm opacity-60 py-2">
-                                    <MapPin :size="14" class="shrink-0" />
+                                <div class="flex items-start gap-1 text-sm opacity-60 py-2">
+                                    <MapPin :size="14" class="shrink-0 mt-0.5" />
                                     <span class="break-words">{{ storyToDelete.location }}</span>
                                 </div>
                                 <p class="text-xs opacity-50 line-clamp-2 break-words">{{ storyToDelete.description }}
