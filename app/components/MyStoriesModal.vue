@@ -55,7 +55,7 @@
                                     <h4 class="font-bold text-base mb-1 cursor-pointer" @click="openStoryDetail(story)">
                                         {{ story.title }}
                                     </h4>
-                                    <div class="flex flex-wrap gap-3 text-xs opacity-70 mb-2">
+                                    <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
                                         <div class="flex items-center gap-1">
                                             <MapPin :size="14" />
                                             <span>{{ story.location }}</span>
@@ -168,7 +168,7 @@
     <!-- Delete Confirmation Modal -->
     <dialog id="delete_story_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between">
                 <h3 class="text-lg font-bold text-error">Hapus Cerita</h3>
                 <button @click="closeDeleteModal" class="btn btn-sm btn-circle btn-ghost">
                     <X :size="18" />
@@ -188,14 +188,17 @@
                 </div>
             </div>
 
-            <div v-if="storyToDelete" class="py-4">
+            <div v-if="storyToDelete" class="pb-4">
                 <p class="mb-4">Apakah Anda yakin ingin menghapus cerita ini?</p>
                 <div class="card bg-base-200">
                     <div class="card-body p-4">
                         <div class="flex gap-3 items-start">
                             <div>
                                 <p class="font-bold">{{ storyToDelete.title }}</p>
-                                <p class="text-sm opacity-60 mb-1">{{ storyToDelete.location }}</p>
+                                <div class="flex items-center gap-1 text-sm opacity-60 py-2">
+                                    <MapPin :size="14" />
+                                    <span>{{ storyToDelete.location }}</span>
+                                </div>
                                 <p class="text-xs opacity-50 line-clamp-2">{{ storyToDelete.description }}</p>
                             </div>
                         </div>

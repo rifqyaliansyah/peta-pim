@@ -24,12 +24,12 @@
                         @click="openStoryDetail(story)">
                         <div class="card-body p-4">
                             <div class="flex items-start justify-between gap-4">
-                                <div class="flex-1">
+                                <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
-                                        <h4 class="font-bold text-base">{{ story.title }}</h4>
+                                        <h4 class="font-bold text-base line-clamp-1 flex-1 min-w-0">{{ story.title }}</h4>
                                         <span class="badge badge-sm badge-ghost">{{ story.author }}</span>
                                     </div>
-                                    <div class="flex flex-wrap gap-3 text-xs opacity-70 mb-2">
+                                    <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
                                         <div class="flex items-center gap-1">
                                             <MapPin :size="14" />
                                             <span>{{ story.location }}</span>
