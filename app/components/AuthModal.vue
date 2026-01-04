@@ -1,11 +1,25 @@
 <template>
-    <dialog id="profile_modal" class="modal modal-bottom sm:modal-middle">
+    <dialog id="auth_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box max-w-md no-scrollbar">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold">Profile</h3>
+                <h3 class="text-xl font-bold">{{ isLoginMode ? 'Login' : 'Daftar Akun' }}</h3>
                 <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
                     <X :size="20" />
                 </button>
+            </div>
+
+            <!-- Error Alert -->
+            <div v-if="errorMessage" class="alert alert-error mb-4">
+                <div class="flex items-center gap-2 w-full">
+                    <button @click="clearError" class="p-0 bg-transparent border-none cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    <span class="flex-1">{{ errorMessage }}</span>
+                </div>
             </div>
 
             <!-- Success Alert -->
@@ -20,81 +34,89 @@
                 </div>
             </div>
 
-            <!-- Error Alert -->
-            <div v-if="nameError && !successMessage" class="alert alert-error mb-4">
-                <div class="flex items-center gap-2 w-full">
-                    <button @click="nameError = ''" class="p-0 bg-transparent border-none cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <!-- Login Form -->
+            <div v-if="isLoginMode" class="space-y-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Email</span>
+                    </label>
+                    <input v-model="loginForm.email" type="email" placeholder="Email anda"
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleLogin" />
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Password</span>
+                    </label>
+                    <input v-model="loginForm.password" type="password" placeholder="Password anda"
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleLogin" />
+                </div>
+
+                <div class="form-control mt-6">
+                    <button @click="handleLogin" class="btn btn-primary w-full" :disabled="submitting">
+                        <span v-if="submitting" class="loading loading-spinner"></span>
+                        {{ submitting ? 'Memproses...' : 'Login' }}
                     </button>
-                    <span class="flex-1">{{ nameError }}</span>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-sm">
+                        Belum punya akun?
+                        <button @click="toggleMode" class="link link-primary font-semibold">
+                            Daftar di sini
+                        </button>
+                    </p>
                 </div>
             </div>
 
-            <div v-if="isLoadingProfile" class="flex items-center justify-center py-12">
-                <div class="flex flex-col items-center gap-4">
-                    <span class="loading loading-spinner loading-lg"></span>
-                    <p class="text-sm opacity-60">Memuat profile...</p>
-                </div>
-            </div>
-
-            <div v-else class="space-y-6">
-                <div class="flex items-center gap-4">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-lg">{{ authStore.user?.name }}</h4>
-                        <p class="text-sm opacity-60">{{ authStore.user?.email }}</p>
-                    </div>
+            <!-- Register Form -->
+            <div v-else class="space-y-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Nama</span>
+                    </label>
+                    <input v-model="registerForm.name" type="text" placeholder="Nama lengkap"
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
-                <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
-                    <div class="stat">
-                        <div class="stat-title text-xs">Total Cerita</div>
-                        <div class="stat-value text-2xl">{{ totalStories }}</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-title text-xs">Dibuat</div>
-                        <div class="stat-value text-2xl">{{ joinDate }}</div>
-                    </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Email</span>
+                    </label>
+                    <input v-model="registerForm.email" type="email" placeholder="Email anda"
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
-                <div class="space-y-3">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold mb-1">User ID</span>
-                        </label>
-                        <input type="text" :value="authStore.user?.id" class="input input-bordered w-full" disabled />
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold mb-1">Nama</span>
-                        </label>
-                        <input type="text" v-model="editableName" class="input input-bordered w-full"
-                            :class="{ 'input-error': nameError }" @input="clearError" />
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold mb-1">Email</span>
-                        </label>
-                        <input type="text" :value="authStore.user?.email" class="input input-bordered w-full"
-                            disabled />
-                    </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Password</span>
+                    </label>
+                    <input v-model="registerForm.password" type="password" placeholder="Minimal 6 karakter"
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
-                <div class="space-y-2 pt-4">
-                    <button @click="handleUpdateProfile" class="btn btn-primary w-full"
-                        :disabled="isUpdating || !hasNameChanged">
-                        <span v-if="isUpdating" class="loading loading-spinner loading-sm"></span>
-                        {{ isUpdating ? 'Menyimpan...' : 'Simpan' }}
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold mb-1">Confirm Password</span>
+                    </label>
+                    <input v-model="registerForm.confirmPassword" type="password" placeholder="Ulangi password"
+                        class="input input-bordered w-full" @input="clearError" @keyup.enter="handleRegister" />
+                </div>
+
+                <div class="form-control mt-6">
+                    <button @click="handleRegister" class="btn btn-primary w-full" :disabled="submitting">
+                        <span v-if="submitting" class="loading loading-spinner"></span>
+                        {{ submitting ? 'Memproses...' : 'Daftar' }}
                     </button>
-                    <button @click="handleLogout" class="btn btn-error w-full" :disabled="isUpdating">
-                        <LogOut :size="18" />
-                        Logout
-                    </button>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-sm">
+                        Sudah punya akun?
+                        <button @click="toggleMode" class="link link-primary font-semibold">
+                            Login di sini
+                        </button>
+                    </p>
                 </div>
             </div>
         </div>
@@ -102,136 +124,118 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { X, LogOut } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { X } from 'lucide-vue-next';
 import { useAuthStore } from '~/stores/auth';
+import { authService } from '~/services/authService';
 
 const authStore = useAuthStore();
 
-const editableName = ref('');
-const nameError = ref('');
+const isLoginMode = ref(true);
+const submitting = ref(false);
+const errorMessage = ref('');
 const successMessage = ref('');
-const isUpdating = ref(false);
-const isLoadingProfile = ref(false);
-const totalStories = ref(0);
-const modalElement = ref(null);
 
-watch(() => authStore.user?.name, (newName) => {
-    if (newName) {
-        editableName.value = newName;
-    }
-}, { immediate: true });
-
-const hasNameChanged = computed(() => {
-    return editableName.value !== authStore.user?.name && editableName.value.trim().length > 0;
+const loginForm = ref({
+    email: '',
+    password: ''
 });
 
-const joinDate = computed(() => {
-    if (!authStore.user?.created_at) return '-';
-
-    try {
-        const date = new Date(authStore.user.created_at);
-        if (isNaN(date.getTime())) return '-';
-
-        return date.toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    } catch (error) {
-        console.error('Error parsing date:', error);
-        return '-';
-    }
+const registerForm = ref({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
 });
+
+const toggleMode = () => {
+    isLoginMode.value = !isLoginMode.value;
+    clearError();
+    loginForm.value = { email: '', password: '' };
+    registerForm.value = { name: '', email: '', password: '', confirmPassword: '' };
+};
 
 const clearError = () => {
-    nameError.value = '';
-    successMessage.value = '';
+    errorMessage.value = '';
 };
 
-const fetchProfileData = async () => {
-    isLoadingProfile.value = true;
-    try {
-        await authStore.fetchProfile();
-        await fetchTotalStories();
-    } catch (error) {
-        console.error('Error fetching profile data:', error);
-    } finally {
-        isLoadingProfile.value = false;
-    }
-};
-
-const fetchTotalStories = async () => {
-    try {
-        const { storyService } = await import('~/services/storyService');
-        const response = await storyService.getCount();
-        if (response.success) {
-            totalStories.value = response.data.count || 0;
-        }
-    } catch (error) {
-        console.error('Error fetching total stories:', error);
-        totalStories.value = 0;
-    }
-};
-
-if (process.client) {
+const showSuccess = (message) => {
+    successMessage.value = message;
     setTimeout(() => {
-        modalElement.value = document.getElementById('profile_modal');
-        if (modalElement.value) {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'open') {
-                        if (modalElement.value.open) {
-                            fetchProfileData();
-                        }
-                    }
-                });
-            });
-            observer.observe(modalElement.value, { attributes: true });
-        }
-    }, 100);
-}
-
-const handleUpdateProfile = async () => {
-    if (!editableName.value || editableName.value.trim().length === 0) {
-        nameError.value = 'Nama tidak boleh kosong';
-        return;
-    }
-
-    if (editableName.value.trim().length < 3) {
-        nameError.value = 'Nama minimal 3 karakter';
-        return;
-    }
-
-    isUpdating.value = true;
-    clearError();
-
-    try {
-        await authStore.updateProfile(editableName.value.trim());
-        successMessage.value = 'Profile berhasil diperbarui!';
-
-        setTimeout(() => {
-            successMessage.value = '';
-            closeModal();
-        }, 1000);
-    } catch (error) {
-        nameError.value = error.message || 'Gagal memperbarui profile';
-    } finally {
-        isUpdating.value = false;
-    }
+        closeModal();
+    }, 1500);
 };
 
 const closeModal = () => {
-    editableName.value = authStore.user?.name || '';
-    clearError();
-    document.getElementById('profile_modal').close();
+    document.getElementById('auth_modal').close();
+    errorMessage.value = '';
+    successMessage.value = '';
+    isLoginMode.value = true;
+    loginForm.value = { email: '', password: '' };
+    registerForm.value = { name: '', email: '', password: '', confirmPassword: '' };
 };
 
-const handleLogout = () => {
-    if (confirm('Yakin ingin logout?')) {
-        authStore.logout();
-        closeModal();
-        window.location.reload();
+const handleLogin = async () => {
+    clearError();
+
+    if (!loginForm.value.email || !loginForm.value.password) {
+        errorMessage.value = 'Email dan password harus diisi';
+        return;
+    }
+
+    submitting.value = true;
+
+    try {
+        const response = await authService.login({
+            email: loginForm.value.email,
+            password: loginForm.value.password
+        });
+
+        authStore.setAuth(response.data);
+
+        showSuccess('Login berhasil!');
+    } catch (error) {
+        errorMessage.value = error.message || 'Login gagal. Silakan coba lagi.';
+    } finally {
+        submitting.value = false;
+    }
+};
+
+const handleRegister = async () => {
+    clearError();
+
+    if (!registerForm.value.name || !registerForm.value.email ||
+        !registerForm.value.password || !registerForm.value.confirmPassword) {
+        errorMessage.value = 'Semua field harus diisi';
+        return;
+    }
+
+    if (registerForm.value.password !== registerForm.value.confirmPassword) {
+        errorMessage.value = 'Password tidak cocok';
+        return;
+    }
+
+    if (registerForm.value.password.length < 6) {
+        errorMessage.value = 'Password minimal 6 karakter';
+        return;
+    }
+
+    submitting.value = true;
+
+    try {
+        const response = await authService.register({
+            name: registerForm.value.name,
+            email: registerForm.value.email,
+            password: registerForm.value.password
+        });
+
+        authStore.setAuth(response.data);
+
+        showSuccess('Registrasi berhasil!');
+    } catch (error) {
+        errorMessage.value = error.message || 'Registrasi gagal. Silakan coba lagi.';
+    } finally {
+        submitting.value = false;
     }
 };
 </script>
