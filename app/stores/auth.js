@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { authService } from '~/services/authService';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -46,6 +47,40 @@ export const useAuthStore = defineStore('auth', {
             if (process.client) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
+            }
+        },
+
+        async fetchProfile() {
+            try {
+                const response = await authService.getProfile();
+                if (response.success) {
+                    this.user = response.data.user;
+
+                    if (process.client) {
+                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                    }
+                }
+                return response;
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                throw error;
+            }
+        },
+
+        async updateProfile(name) {
+            try {
+                const response = await authService.updateProfile(name);
+                if (response.success) {
+                    this.user = response.data.user;
+
+                    if (process.client) {
+                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                    }
+                }
+                return response;
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                throw error;
             }
         },
 

@@ -56,7 +56,7 @@
 
         <Transition name="slide-up">
             <div v-if="isAddMode"
-                class="absolute bottom-20 sm:bottom-8 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3 pb-safe">
+                class="absolute bottom-20 sm:bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3 pb-safe">
                 <button @click="cancelAddMode" class="btn btn-error btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
                     <X :size="16" class="sm:w-5 sm:h-5" />
                     <span class="text-sm sm:text-base">Cancel</span>

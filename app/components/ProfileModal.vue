@@ -8,7 +8,14 @@
                 </button>
             </div>
 
-            <div class="space-y-6">
+            <div v-if="isLoadingProfile" class="flex items-center justify-center py-12">
+                <div class="flex flex-col items-center gap-4">
+                    <span class="loading loading-spinner loading-lg"></span>
+                    <p class="text-sm opacity-60">Memuat profile...</p>
+                </div>
+            </div>
+
+            <div v-else class="space-y-6">
                 <div class="flex items-center gap-4">
                     <div class="flex-1">
                         <h4 class="font-bold text-lg">{{ authStore.user?.name }}</h4>
@@ -72,17 +79,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { X, LogOut } from 'lucide-vue-next';
 import { useAuthStore } from '~/stores/auth';
-import { authService } from '~/services/authService';
 
 const authStore = useAuthStore();
 
 const editableName = ref('');
 const nameError = ref('');
 const isUpdating = ref(false);
+const isLoadingProfile = ref(false);
 const totalStories = ref(0);
+const modalElement = ref(null);
 
 watch(() => authStore.user?.name, (newName) => {
     if (newName) {
@@ -95,18 +103,11 @@ const hasNameChanged = computed(() => {
 });
 
 const joinDate = computed(() => {
-    if (!authStore.user?.created_at) {
-        console.log('created_at kosong:', authStore.user);
-        return '-';
-    }
+    if (!authStore.user?.created_at) return '-';
 
     try {
         const date = new Date(authStore.user.created_at);
-
-        if (isNaN(date.getTime())) {
-            console.log('Invalid date:', authStore.user.created_at);
-            return '-';
-        }
+        if (isNaN(date.getTime())) return '-';
 
         return date.toLocaleDateString('id-ID', {
             day: 'numeric',
@@ -118,6 +119,18 @@ const joinDate = computed(() => {
         return '-';
     }
 });
+
+const fetchProfileData = async () => {
+    isLoadingProfile.value = true;
+    try {
+        await authStore.fetchProfile();
+        await fetchTotalStories();
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+    } finally {
+        isLoadingProfile.value = false;
+    }
+};
 
 const fetchTotalStories = async () => {
     try {
@@ -132,9 +145,23 @@ const fetchTotalStories = async () => {
     }
 };
 
-onMounted(() => {
-    fetchTotalStories();
-});
+if (process.client) {
+    setTimeout(() => {
+        modalElement.value = document.getElementById('profile_modal');
+        if (modalElement.value) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'open') {
+                        if (modalElement.value.open) {
+                            fetchProfileData();
+                        }
+                    }
+                });
+            });
+            observer.observe(modalElement.value, { attributes: true });
+        }
+    }, 100);
+}
 
 const handleUpdateProfile = async () => {
     if (!editableName.value || editableName.value.trim().length === 0) {
@@ -151,19 +178,8 @@ const handleUpdateProfile = async () => {
     nameError.value = '';
 
     try {
-        const response = await authService.authenticatedRequest('/auth/profile', {
-            method: 'PUT',
-            body: JSON.stringify({ name: editableName.value.trim() })
-        });
-
-        if (response.success) {
-            authStore.setAuth({
-                user: response.data.user,
-                token: authStore.token
-            });
-
-            alert('Profile berhasil diupdate!');
-        }
+        await authStore.updateProfile(editableName.value.trim());
+        alert('Profile berhasil diupdate!');
     } catch (error) {
         nameError.value = error.message || 'Gagal update profile';
     } finally {
