@@ -53,8 +53,10 @@
                             <Eye :size="14" />
                             <span>{{ story.views_count || 0 }} views</span>
                         </div>
-                        <button @click="viewStoryDetail(story)" class="btn btn-xs btn-primary w-full">
-                            Lihat Detail
+                        <button @click="viewStoryDetail(story)" class="btn btn-xs btn-primary w-full"
+                            :disabled="loadingDetail === story.id">
+                            <span v-if="loadingDetail === story.id" class="loading loading-spinner loading-xs"></span>
+                            <span v-else>Lihat Detail</span>
                         </button>
                     </div>
                 </LPopup>
@@ -172,6 +174,7 @@ const selectedStory = ref(null);
 const stories = ref([]);
 const loading = ref(false);
 const isLoadingLocation = ref(false);
+const loadingDetail = ref(null);
 
 onMounted(async () => {
     await fetchStories();
@@ -265,15 +268,24 @@ const handleStorySubmit = async (formData) => {
 };
 
 const viewStoryDetail = async (story) => {
-    selectedStory.value = story;
+    loadingDetail.value = story.id;
 
-    await storyService.incrementView(story.id);
+    try {
+        selectedStory.value = story;
 
-    if (selectedStory.value.views_count !== undefined) {
-        selectedStory.value.views_count += 1;
+        await storyService.incrementView(story.id);
+
+        if (selectedStory.value.views_count !== undefined) {
+            selectedStory.value.views_count += 1;
+        }
+
+        // Open modal
+        document.getElementById('story_detail_modal').showModal();
+    } catch (error) {
+        console.error('Error viewing story detail:', error);
+    } finally {
+        loadingDetail.value = null;
     }
-
-    document.getElementById('story_detail_modal').showModal();
 };
 
 const closeDetailModal = () => {
