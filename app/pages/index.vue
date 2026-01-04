@@ -152,6 +152,7 @@
     </dialog>
 
     <AddStoryModal ref="addStoryModalRef" @submit="handleStorySubmit" />
+    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" />
 </template>
 
 <script setup>
@@ -288,6 +289,20 @@ const formatDate = (dateString) => {
         month: 'long',
         year: 'numeric'
     });
+};
+
+const handleStoryUpdate = async () => {
+    console.log('Story updated, refreshing map...');
+    await fetchStories();
+};
+
+const handleStoryDelete = async () => {
+    console.log('Story deleted, refreshing map...');
+    await fetchStories();
+
+    if (selectedStory.value) {
+        closeDetailModal();
+    }
 };
 </script>
 

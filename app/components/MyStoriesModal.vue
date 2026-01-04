@@ -266,6 +266,7 @@ const storyToDelete = ref(null);
 const deleting = ref(false);
 const deleteErrorMessage = ref('');
 const myStories = ref([]);
+const emit = defineEmits(['storyUpdated', 'storyDeleted']);
 
 const editForm = ref({
     id: null,
@@ -365,6 +366,7 @@ const confirmDelete = async () => {
         }
 
         successMessage.value = `Cerita "${storyToDelete.value.title}" berhasil dihapus!`;
+        emit('storyDeleted');
         closeDeleteModal();
 
         setTimeout(() => {
@@ -453,6 +455,8 @@ const submitEdit = async () => {
                 updated_at: new Date().toISOString()
             };
         }
+
+        emit('storyUpdated');
 
         setTimeout(() => {
             cancelEdit();
