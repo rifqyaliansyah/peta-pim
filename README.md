@@ -1,75 +1,40 @@
-# Nuxt Minimal Starter
+# 🗺️ Peta-Pim
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+**Peta-Pim** adalah platform berbagi cerita berbasis **peta interaktif**, di mana pengguna dapat menambahkan dan menjelajahi cerita berdasarkan lokasi geografis.
 
-## Setup
+---
 
-Make sure to install dependencies:
+## ✨ Features
 
-```bash
-# npm
-npm install
+- 🗺️ Peta interaktif menggunakan **Leaflet**
+- 📝 Tambah, edit, dan hapus cerita berbasis lokasi
+- 🔐 Autentikasi pengguna (Login & Register)
+- 📍 Reverse geocoding (koordinat → alamat)
+- 🎨 Multi-theme support (DaisyUI)
+- 📱 Desain responsif
 
-# pnpm
-pnpm install
+---
 
-# yarn
-yarn install
+## 🛠️ Tech Stack
 
-# bun
-bun install
-```
+- **Nuxt 4**
+- **Tailwindcss 4**
+- **DaisyUI**
+- **Leaflet**
+- **Pinia**
 
-## Development Server
+---
 
-Start the development server on `http://localhost:3000`:
+## 🚀 Usage
 
-```bash
-# npm
-npm run dev
+1. Buka aplikasi di browser  
 
-# pnpm
-pnpm dev
+2. Login atau Register akun
 
-# yarn
-yarn dev
+3. Klik tombol **Tambah Cerita**
 
-# bun
-bun run dev
-```
+4. Pilih lokasi dengan klik langsung pada peta
 
-## Production
+5. Isi judul dan isi cerita, lalu submit
 
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+6. Jelajahi cerita dengan mengklik marker yang tersedia di peta
