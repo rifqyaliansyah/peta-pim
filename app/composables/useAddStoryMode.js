@@ -1,6 +1,7 @@
 export const useAddStoryMode = () => {
     const isAddMode = useState('isAddMode', () => false);
     const tempMarker = useState('tempMarker', () => null);
+    const tempLocation = useState('tempLocation', () => null);
 
     const startAddMode = () => {
         isAddMode.value = true;
@@ -20,12 +21,23 @@ export const useAddStoryMode = () => {
         tempMarker.value = null;
     };
 
+    const setTempLocation = (location) => {
+        tempLocation.value = location;
+    };
+
+    const clearTempLocation = () => {
+        tempLocation.value = null;
+    };
+
     return {
         isAddMode,
         tempMarker,
+        tempLocation,
         startAddMode,
         exitAddMode,
         setTempMarker,
-        clearTempMarker
+        clearTempMarker,
+        setTempLocation,
+        clearTempLocation
     };
 };

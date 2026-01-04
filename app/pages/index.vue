@@ -28,10 +28,17 @@
 
             <LMarker v-if="tempMarker" :lat-lng="tempMarker" draggable @dragend="updateTempMarkerPosition">
                 <LPopup>
-                    <div class="text-sm">
-                        <p class="font-bold mb-1">Lokasi Baru</p>
-                        <p class="text-xs opacity-70">Lat: {{ tempMarker[0].toFixed(6) }}</p>
-                        <p class="text-xs opacity-70">Lng: {{ tempMarker[1].toFixed(6) }}</p>
+                    <div class="text-sm min-w-[200px]">
+                        <p class="font-bold mb-2">Lokasi Baru</p>
+                        <div v-if="isLoadingLocation" class="flex items-center gap-2 py-2">
+                            <span class="loading loading-spinner loading-sm"></span>
+                            <span class="text-xs opacity-70">Mendapatkan lokasi...</span>
+                        </div>
+                        <div v-else>
+                            <p class="text-xs mb-2 break-words">{{ tempLocation || 'Lokasi tidak ditemukan' }}</p>
+                            <p class="text-xs opacity-70">Lat: {{ tempMarker[0].toFixed(6) }}</p>
+                            <p class="text-xs opacity-70">Lng: {{ tempMarker[1].toFixed(6) }}</p>
+                        </div>
                     </div>
                 </LPopup>
             </LMarker>
@@ -56,7 +63,7 @@
 
         <Transition name="slide-up">
             <div v-if="isAddMode"
-                class="absolute bottom-20 sm:bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3 pb-safe">
+                class="absolute bottom-20 sm:bottom-8 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3">
                 <button @click="cancelAddMode" class="btn btn-error btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
                     <X :size="16" class="sm:w-5 sm:h-5" />
                     <span class="text-sm sm:text-base">Cancel</span>
@@ -101,7 +108,8 @@
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
-                        <p class="text-base leading-relaxed whitespace-pre-line wrap-break-word">{{ selectedStory.full_story ||
+                        <p class="text-base leading-relaxed whitespace-pre-line wrap-break-word">{{
+                            selectedStory.full_story ||
                             selectedStory.description }}</p>
                     </div>
                 </div>
@@ -148,6 +156,7 @@
 import { X, Plus, MapPin, Eye } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
 import { storyService } from '~/services/storyService';
+import { geocodingService } from '~/services/geocodingService';
 import { ref, onMounted } from 'vue';
 
 definePageMeta({
@@ -155,10 +164,11 @@ definePageMeta({
 });
 
 const addStoryModalRef = ref(null);
-const { isAddMode, tempMarker, exitAddMode, setTempMarker, clearTempMarker } = useAddStoryMode();
+const { isAddMode, tempMarker, tempLocation, exitAddMode, setTempMarker, setTempLocation, clearTempMarker } = useAddStoryMode();
 const selectedStory = ref(null);
 const stories = ref([]);
 const loading = ref(false);
+const isLoadingLocation = ref(false);
 
 onMounted(async () => {
     await fetchStories();
@@ -176,16 +186,35 @@ const fetchStories = async () => {
     }
 };
 
-const handleMapClick = (event) => {
+const fetchLocationName = async (lat, lng) => {
+    isLoadingLocation.value = true;
+    try {
+        const result = await geocodingService.reverseGeocode(lat, lng);
+        if (result.success) {
+            setTempLocation(result.formattedAddress);
+        } else {
+            setTempLocation('Lokasi tidak ditemukan');
+        }
+    } catch (error) {
+        console.error('Error fetching location:', error);
+        setTempLocation('Lokasi tidak ditemukan');
+    } finally {
+        isLoadingLocation.value = false;
+    }
+};
+
+const handleMapClick = async (event) => {
     if (!isAddMode.value) return;
 
     const { lat, lng } = event.latlng;
     setTempMarker([lat, lng]);
+    await fetchLocationName(lat, lng);
 };
 
-const updateTempMarkerPosition = (event) => {
+const updateTempMarkerPosition = async (event) => {
     const { lat, lng } = event.target.getLatLng();
     setTempMarker([lat, lng]);
+    await fetchLocationName(lat, lng);
 };
 
 const cancelAddMode = () => {
@@ -202,7 +231,8 @@ const proceedToAddStory = () => {
     if (addStoryModalRef.value) {
         addStoryModalRef.value.openModal({
             lat: tempMarker.value[0],
-            lng: tempMarker.value[1]
+            lng: tempMarker.value[1],
+            locationName: tempLocation.value
         });
     }
 };
