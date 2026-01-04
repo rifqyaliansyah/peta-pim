@@ -21,17 +21,24 @@
             </div>
         </div>
 
-        <LMap :zoom="5" :center="[-2.5489, 118.0149]" :use-global-leaflet="false" @click="handleMapClick">
+        <LMap ref="mapRef" :zoom="5" :center="[-2.5489, 118.0149]" :use-global-leaflet="false" @click="handleMapClick">
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution="&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
                 layer-type="base" name="OpenStreetMap" />
 
             <LMarker v-if="tempMarker" :lat-lng="tempMarker" draggable @dragend="updateTempMarkerPosition">
                 <LPopup>
-                    <div class="text-sm">
-                        <p class="font-bold mb-1">Lokasi Baru</p>
-                        <p class="text-xs opacity-70">Lat: {{ tempMarker[0].toFixed(6) }}</p>
-                        <p class="text-xs opacity-70">Lng: {{ tempMarker[1].toFixed(6) }}</p>
+                    <div class="text-sm min-w-[200px]">
+                        <p class="font-bold mb-2">Lokasi Baru</p>
+                        <div v-if="isLoadingLocation" class="flex items-center gap-2 py-2">
+                            <span class="loading loading-spinner loading-sm"></span>
+                            <span class="text-xs opacity-70">Mendapatkan lokasi...</span>
+                        </div>
+                        <div v-else>
+                            <p class="text-xs mb-2 break-words">{{ tempLocation || 'Lokasi tidak ditemukan' }}</p>
+                            <p class="text-xs opacity-70">Lat: {{ tempMarker[0].toFixed(6) }}</p>
+                            <p class="text-xs opacity-70">Lng: {{ tempMarker[1].toFixed(6) }}</p>
+                        </div>
                     </div>
                 </LPopup>
             </LMarker>
@@ -39,15 +46,17 @@
             <LMarker v-for="story in stories" :key="story.id" :lat-lng="[story.latitude, story.longitude]">
                 <LPopup>
                     <div class="min-w-[200px]">
-                        <h4 class="font-bold text-sm mb-2">{{ story.title }}</h4>
-                        <p class="text-xs opacity-70 mb-1">{{ story.location }}</p>
-                        <p class="text-xs mb-2 line-clamp-2">{{ story.description }}</p>
+                        <h4 class="font-bold text-sm mb-2 wrap-break-word">{{ story.title }}</h4>
+                        <p class="text-xs opacity-70 mb-1 wrap-break-word">{{ story.location }}</p>
+                        <p class="text-xs mb-2 line-clamp-2 wrap-break-word">{{ story.description }}</p>
                         <div class="flex items-center gap-2 text-xs opacity-60 mb-3">
                             <Eye :size="14" />
                             <span>{{ story.views_count || 0 }} views</span>
                         </div>
-                        <button @click="viewStoryDetail(story)" class="btn btn-xs btn-primary w-full">
-                            Lihat Detail
+                        <button @click="viewStoryDetail(story)" class="btn btn-xs btn-primary w-full"
+                            :disabled="loadingDetail === story.id">
+                            <span v-if="loadingDetail === story.id" class="loading loading-spinner loading-xs"></span>
+                            <span v-else>Lihat Detail</span>
                         </button>
                     </div>
                 </LPopup>
@@ -55,14 +64,16 @@
         </LMap>
 
         <Transition name="slide-up">
-            <div v-if="isAddMode" class="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-3">
-                <button @click="cancelAddMode" class="btn btn-error btn-lg shadow-lg">
-                    <X :size="20" />
-                    Cancel
+            <div v-if="isAddMode"
+                class="absolute bottom-20 sm:bottom-8 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3">
+                <button @click="cancelAddMode" class="btn btn-error btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
+                    <X :size="16" class="sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Cancel</span>
                 </button>
-                <button @click="proceedToAddStory" class="btn btn-primary btn-lg shadow-lg">
-                    <Plus :size="20" />
-                    Tambah Cerita
+                <button @click="proceedToAddStory"
+                    class="btn btn-primary btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
+                    <Plus :size="16" class="sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Tambah Cerita</span>
                 </button>
             </div>
         </Transition>
@@ -71,7 +82,7 @@
     <dialog id="story_detail_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box max-w-4xl flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between mb-6 shrink-0">
-                <div>
+                <div class="wrap-break-word overflow-y-auto">
                     <h3 class="text-xl font-bold">{{ selectedStory?.title }}</h3>
                 </div>
                 <button @click="closeDetailModal" class="btn btn-sm btn-circle btn-ghost">
@@ -86,20 +97,23 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span>{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm opacity-70">
                             <Eye :size="16" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
+
+                        <p class="text-sm opacity-80 line-clamp-2 break-words mt-2">{{ selectedStory.description }}</p>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
-                        <p class="text-base leading-relaxed whitespace-pre-line">{{ selectedStory.full_story ||
+                        <p class="text-base leading-relaxed whitespace-pre-line wrap-break-word">{{
+                            selectedStory.full_story ||
                             selectedStory.description }}</p>
                     </div>
                 </div>
@@ -140,12 +154,15 @@
     </dialog>
 
     <AddStoryModal ref="addStoryModalRef" @submit="handleStorySubmit" />
+    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" @viewOnMap="handleViewOnMap" @closeDrawer="closeDrawer" />
+    <AllStoriesModal @viewOnMap="handleViewOnMap" @closeDrawer="closeDrawer" />
 </template>
 
 <script setup>
 import { X, Plus, MapPin, Eye } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
 import { storyService } from '~/services/storyService';
+import { geocodingService } from '~/services/geocodingService';
 import { ref, onMounted } from 'vue';
 
 definePageMeta({
@@ -153,10 +170,13 @@ definePageMeta({
 });
 
 const addStoryModalRef = ref(null);
-const { isAddMode, tempMarker, exitAddMode, setTempMarker, clearTempMarker } = useAddStoryMode();
+const { isAddMode, tempMarker, tempLocation, exitAddMode, setTempMarker, setTempLocation, clearTempMarker } = useAddStoryMode();
 const selectedStory = ref(null);
 const stories = ref([]);
 const loading = ref(false);
+const isLoadingLocation = ref(false);
+const loadingDetail = ref(null);
+const mapRef = ref(null);
 
 onMounted(async () => {
     await fetchStories();
@@ -174,16 +194,35 @@ const fetchStories = async () => {
     }
 };
 
-const handleMapClick = (event) => {
+const fetchLocationName = async (lat, lng) => {
+    isLoadingLocation.value = true;
+    try {
+        const result = await geocodingService.reverseGeocode(lat, lng);
+        if (result.success) {
+            setTempLocation(result.formattedAddress);
+        } else {
+            setTempLocation('Lokasi tidak ditemukan');
+        }
+    } catch (error) {
+        console.error('Error fetching location:', error);
+        setTempLocation('Lokasi tidak ditemukan');
+    } finally {
+        isLoadingLocation.value = false;
+    }
+};
+
+const handleMapClick = async (event) => {
     if (!isAddMode.value) return;
 
     const { lat, lng } = event.latlng;
     setTempMarker([lat, lng]);
+    await fetchLocationName(lat, lng);
 };
 
-const updateTempMarkerPosition = (event) => {
+const updateTempMarkerPosition = async (event) => {
     const { lat, lng } = event.target.getLatLng();
     setTempMarker([lat, lng]);
+    await fetchLocationName(lat, lng);
 };
 
 const cancelAddMode = () => {
@@ -200,7 +239,8 @@ const proceedToAddStory = () => {
     if (addStoryModalRef.value) {
         addStoryModalRef.value.openModal({
             lat: tempMarker.value[0],
-            lng: tempMarker.value[1]
+            lng: tempMarker.value[1],
+            locationName: tempLocation.value
         });
     }
 };
@@ -230,15 +270,23 @@ const handleStorySubmit = async (formData) => {
 };
 
 const viewStoryDetail = async (story) => {
-    selectedStory.value = story;
+    loadingDetail.value = story.id;
 
-    await storyService.incrementView(story.id);
+    try {
+        selectedStory.value = story;
 
-    if (selectedStory.value.views_count !== undefined) {
-        selectedStory.value.views_count += 1;
+        await storyService.incrementView(story.id);
+
+        if (selectedStory.value.views_count !== undefined) {
+            selectedStory.value.views_count += 1;
+        }
+
+        document.getElementById('story_detail_modal').showModal();
+    } catch (error) {
+        console.error('Error viewing story detail:', error);
+    } finally {
+        loadingDetail.value = null;
     }
-
-    document.getElementById('story_detail_modal').showModal();
 };
 
 const closeDetailModal = () => {
@@ -254,6 +302,54 @@ const formatDate = (dateString) => {
         month: 'long',
         year: 'numeric'
     });
+};
+
+const zoomToLocation = (latitude, longitude) => {
+    if (mapRef.value && mapRef.value.leafletObject) {
+        const map = mapRef.value.leafletObject;
+        map.setView(
+            [latitude, longitude],
+            15,
+            { animate: true, duration: 1 }
+        );
+    }
+};
+
+const viewOnMapFromDetail = () => {
+    if (!selectedStory.value) return;
+
+    closeDetailModal();
+
+    setTimeout(() => {
+        zoomToLocation(selectedStory.value.latitude, selectedStory.value.longitude);
+    }, 300);
+};
+
+const handleViewOnMap = (coordinates) => {
+    setTimeout(() => {
+        zoomToLocation(coordinates.latitude, coordinates.longitude);
+    }, 300);
+};
+
+const handleStoryUpdate = async () => {
+    console.log('Story updated, refreshing map...');
+    await fetchStories();
+};
+
+const handleStoryDelete = async () => {
+    console.log('Story deleted, refreshing map...');
+    await fetchStories();
+
+    if (selectedStory.value) {
+        closeDetailModal();
+    }
+};
+
+const closeDrawer = () => {
+    const drawerCheckbox = document.getElementById('my-drawer-4');
+    if (drawerCheckbox) {
+        drawerCheckbox.checked = false;
+    }
 };
 </script>
 

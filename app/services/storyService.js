@@ -220,4 +220,32 @@ export const storyService = {
             throw error;
         }
     },
+    async getCount() {
+        const API_BASE_URL = getApiBaseUrl();
+        const token = getAuthToken();
+
+        if (!token) {
+            throw new Error('Anda harus login terlebih dahulu');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/stories/count`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Gagal mengambil jumlah cerita');
+        }
+
+        if (!data.success) {
+            throw new Error(data.message || 'Gagal mengambil jumlah cerita');
+        }
+
+        return data;
+    },
 };

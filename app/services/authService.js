@@ -58,6 +58,26 @@ export const authService = {
         }
     },
 
+    async getProfile() {
+        return await this.authenticatedRequest('/auth/me', {
+            method: 'GET'
+        });
+    },
+
+    async updateProfile(name, oldPassword = null, newPassword = null) {
+        const body = { name };
+
+        if (oldPassword && newPassword) {
+            body.oldPassword = oldPassword;
+            body.newPassword = newPassword;
+        }
+
+        return await this.authenticatedRequest('/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        });
+    },
+
     async authenticatedRequest(url, options = {}) {
         const API_BASE_URL = getApiBaseUrl();
         const token = localStorage.getItem('token');

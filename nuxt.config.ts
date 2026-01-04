@@ -11,11 +11,11 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Peta-Pim | Cerita Random di Dunia',
+      title: 'Peta-Pim | Cerita Random yang ada di Dunia',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Peta-Pim | Cerita Random di Dunia' }
+        { name: 'description', content: 'Peta-Pim | Cerita Random yang ada di Dunia' }
       ],
       // link: [
       //   { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }

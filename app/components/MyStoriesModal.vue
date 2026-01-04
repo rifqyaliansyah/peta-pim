@@ -2,14 +2,14 @@
     <dialog id="my_stories_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box max-w-4xl flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between mb-6 shrink-0">
-                <div>
-                    <h3 class="text-xl font-bold">
+                <div class="flex-1 pr-4 min-w-0">
+                    <h3 class="text-xl font-bold break-words" style="word-break: break-word;">
                         {{ isEditMode ? 'Edit Cerita' : (selectedStory ? selectedStory.title : 'Cerita Saya') }}
                     </h3>
                     <p v-if="!isEditMode && !selectedStory" class="text-sm opacity-60 mt-1">{{ myStories.length }}
                         cerita</p>
                 </div>
-                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
+                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost shrink-0">
                     <X :size="20" />
                 </button>
             </div>
@@ -60,28 +60,28 @@
                         class="card bg-base-200 hover:bg-base-300 transition-colors">
                         <div class="card-body p-4">
                             <div class="flex items-start justify-between gap-4">
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-base mb-1 cursor-pointer"
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-base mb-1 cursor-pointer break-words"
                                         @click="openStoryDetail(story)">
                                         {{ story.title }}
                                     </h4>
                                     <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
-                                        <div class="flex items-center gap-1">
-                                            <MapPin :size="14" />
-                                            <span>{{ story.location }}</span>
+                                        <div class="flex items-start gap-1">
+                                            <MapPin :size="14" class="shrink-0 mt-0.5" />
+                                            <span class="break-words">{{ story.location }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Calendar :size="14" />
+                                        <div class="flex items-start gap-1">
+                                            <Calendar :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ formatDate(story.created_at) }}</span>
                                         </div>
-                                        <div class="flex items-center gap-1">
-                                            <Eye :size="14" />
+                                        <div class="flex items-start gap-1">
+                                            <Eye :size="14" class="shrink-0 mt-0.5" />
                                             <span>{{ story.views_count || 0 }} views</span>
                                         </div>
                                     </div>
-                                    <p class="text-sm opacity-80 line-clamp-2">{{ story.description }}</p>
+                                    <p class="text-sm opacity-80 line-clamp-2 break-words">{{ story.description }}</p>
                                 </div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 shrink-0">
                                     <button @click="switchToEdit(story)" class="btn btn-sm btn-ghost btn-square"
                                         title="Edit">
                                         <Edit :size="16" />
@@ -150,20 +150,22 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span>{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70">
-                            <Eye :size="16" />
+                        <div class="flex items-start gap-2 text-sm opacity-70">
+                            <Eye :size="16" class="shrink-0 mt-0.5" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
+                        <p class="text-sm opacity-80 line-clamp-2 break-words mt-2">{{ selectedStory.description }}</p>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
-                        <p class="text-base leading-relaxed whitespace-pre-line">{{ selectedStory.full_story }}</p>
+                        <p class="text-base leading-relaxed whitespace-pre-line break-words">{{ selectedStory.full_story
+                        }}</p>
                     </div>
                 </div>
             </div>
@@ -171,11 +173,19 @@
             <!-- Modal Actions -->
             <div class="modal-action mt-6 shrink-0 pt-4 border-t border-base-300">
                 <button v-if="!isEditMode && !selectedStory" @click="closeModal" class="btn btn-ghost">Tutup</button>
-                <button v-if="selectedStory && !isEditMode" @click="backToList" class="btn btn-ghost">Kembali</button>
+
+                <template v-if="selectedStory && !isEditMode">
+                    <button @click="viewOnMap" class="btn btn-primary">
+                        <MapPin :size="18" />
+                        Lihat di Peta
+                    </button>
+                    <button @click="backToList" class="btn btn-ghost">Kembali</button>
+                </template>
+
                 <template v-if="isEditMode">
                     <button @click="cancelEdit" class="btn btn-ghost" :disabled="submitting">Batal</button>
                     <button @click="submitEdit" class="btn btn-primary" :disabled="submitting">
-                        <span v-if="submitting" class="loading loading-spinner"></span>
+                        <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
                         <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -216,13 +226,14 @@
                 <div class="card bg-base-200">
                     <div class="card-body p-4">
                         <div class="flex gap-3 items-start">
-                            <div>
-                                <p class="font-bold">{{ storyToDelete.title }}</p>
-                                <div class="flex items-center gap-1 text-sm opacity-60 py-2">
-                                    <MapPin :size="14" />
-                                    <span>{{ storyToDelete.location }}</span>
+                            <div class="min-w-0 flex-1">
+                                <p class="font-bold break-words">{{ storyToDelete.title }}</p>
+                                <div class="flex items-start gap-1 text-sm opacity-60 py-2">
+                                    <MapPin :size="14" class="shrink-0 mt-0.5" />
+                                    <span class="break-words">{{ storyToDelete.location }}</span>
                                 </div>
-                                <p class="text-xs opacity-50 line-clamp-2">{{ storyToDelete.description }}</p>
+                                <p class="text-xs opacity-50 line-clamp-2 break-words">{{ storyToDelete.description }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -232,7 +243,7 @@
             <div class="modal-action">
                 <button @click="closeDeleteModal" class="btn btn-ghost" :disabled="deleting">Batal</button>
                 <button @click="confirmDelete" class="btn btn-error" :disabled="deleting">
-                    <span v-if="deleting" class="loading loading-spinner"></span>
+                    <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -263,6 +274,7 @@ const storyToDelete = ref(null);
 const deleting = ref(false);
 const deleteErrorMessage = ref('');
 const myStories = ref([]);
+const emit = defineEmits(['storyUpdated', 'storyDeleted', 'viewOnMap', 'closeDrawer']);
 
 const editForm = ref({
     id: null,
@@ -362,6 +374,7 @@ const confirmDelete = async () => {
         }
 
         successMessage.value = `Cerita "${storyToDelete.value.title}" berhasil dihapus!`;
+        emit('storyDeleted');
         closeDeleteModal();
 
         setTimeout(() => {
@@ -402,6 +415,8 @@ const cancelEdit = () => {
 };
 
 const submitEdit = async () => {
+    if (submitting.value) return;
+
     errorMessage.value = '';
     successMessage.value = '';
 
@@ -449,6 +464,8 @@ const submitEdit = async () => {
             };
         }
 
+        emit('storyUpdated');
+
         setTimeout(() => {
             cancelEdit();
             successMessage.value = '';
@@ -468,6 +485,18 @@ const openStoryDetail = (story) => {
 const backToList = () => {
     selectedStory.value = null;
 };
+
+const viewOnMap = () => {
+    if (!selectedStory.value) return;
+
+    emit('viewOnMap', {
+        latitude: selectedStory.value.latitude,
+        longitude: selectedStory.value.longitude
+    });
+
+    emit('closeDrawer');
+    closeModal();
+};
 </script>
 
 <style scoped>
@@ -478,5 +507,12 @@ const backToList = () => {
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 </style>
