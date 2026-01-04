@@ -40,7 +40,16 @@
                 </div>
             </div>
 
-            <div v-if="!isEditMode && !selectedStory" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+            <!-- Loading State -->
+            <div v-if="loading" class="flex-1 flex items-center justify-center py-12">
+                <div class="flex flex-col items-center gap-4">
+                    <span class="loading loading-spinner loading-lg"></span>
+                    <p class="text-sm opacity-60">Memuat cerita...</p>
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div v-else-if="!isEditMode && !selectedStory" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
                 <div v-if="myStories.length === 0" class="text-center py-12">
                     <BookOpen :size="48" class="mx-auto opacity-30 mb-4" />
                     <p class="text-base-content/60">Belum ada cerita yang ditambahkan</p>
@@ -52,7 +61,8 @@
                         <div class="card-body p-4">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex-1">
-                                    <h4 class="font-bold text-base mb-1 cursor-pointer" @click="openStoryDetail(story)">
+                                    <h4 class="font-bold text-base mb-1 cursor-pointer"
+                                        @click="openStoryDetail(story)">
                                         {{ story.title }}
                                     </h4>
                                     <div class="flex flex-wrap gap-4 text-xs opacity-70 py-2">
@@ -62,7 +72,11 @@
                                         </div>
                                         <div class="flex items-center gap-1">
                                             <Calendar :size="14" />
-                                            <span>{{ story.date }}</span>
+                                            <span>{{ formatDate(story.created_at) }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <Eye :size="14" />
+                                            <span>{{ story.views_count || 0 }} views</span>
                                         </div>
                                     </div>
                                     <p class="text-sm opacity-80 line-clamp-2">{{ story.description }}</p>
@@ -83,14 +97,15 @@
                 </div>
             </div>
 
-            <div v-if="isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+            <!-- Edit Form -->
+            <div v-else-if="isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
                 <div class="space-y-4">
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold mb-1">Judul Cerita</span>
                         </label>
                         <input v-model="editForm.title" type="text" placeholder="Masukkan judul cerita"
-                            class="input input-bordered w-full" @input="clearError" />
+                            class="input input-bordered w-full" @input="clearError" :disabled="submitting" />
                     </div>
 
                     <div class="form-control">
@@ -98,7 +113,7 @@
                             <span class="label-text font-semibold mb-1">Lokasi</span>
                         </label>
                         <input v-model="editForm.location" type="text" placeholder="Contoh: Bandung, Jawa Barat"
-                            class="input input-bordered w-full" @input="clearError" />
+                            class="input input-bordered w-full" @input="clearError" :disabled="submitting" />
                     </div>
 
                     <div class="form-control">
@@ -106,7 +121,8 @@
                             <span class="label-text font-semibold mb-1">Deskripsi Singkat</span>
                         </label>
                         <textarea v-model="editForm.description" placeholder="Deskripsi singkat cerita..."
-                            class="textarea textarea-bordered h-24 w-full" @input="clearError"></textarea>
+                            class="textarea textarea-bordered h-24 w-full" @input="clearError"
+                            :disabled="submitting"></textarea>
                         <label class="label">
                             <span class="label-text-alt opacity-60">{{ editForm.description.length }} karakter</span>
                         </label>
@@ -117,7 +133,8 @@
                             <span class="label-text font-semibold mb-1">Cerita Lengkap</span>
                         </label>
                         <textarea v-model="editForm.full_story" placeholder="Tulis cerita lengkap di sini..."
-                            class="textarea textarea-bordered h-64 w-full" @input="clearError"></textarea>
+                            class="textarea textarea-bordered h-64 w-full" @input="clearError"
+                            :disabled="submitting"></textarea>
                         <label class="label">
                             <span class="label-text-alt opacity-60">{{ editForm.full_story.length }} karakter</span>
                         </label>
@@ -125,16 +142,21 @@
                 </div>
             </div>
 
-            <div v-if="selectedStory && !isEditMode" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
+            <!-- Detail View -->
+            <div v-else-if="selectedStory" class="flex-1 overflow-y-auto -mx-6 px-6 no-scrollbar">
                 <div class="space-y-6">
                     <div>
                         <div class="mb-3">
-                            <p class="font-semibold">{{ selectedStory.author }}</p>
-                            <p class="text-xs opacity-60">{{ selectedStory.date }}</p>
+                            <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
+                            <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70">
+                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
                             <MapPin :size="16" />
                             <span>{{ selectedStory.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm opacity-70">
+                            <Eye :size="16" />
+                            <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
                     </div>
 
@@ -146,6 +168,7 @@
                 </div>
             </div>
 
+            <!-- Modal Actions -->
             <div class="modal-action mt-6 shrink-0 pt-4 border-t border-base-300">
                 <button v-if="!isEditMode && !selectedStory" @click="closeModal" class="btn btn-ghost">Tutup</button>
                 <button v-if="selectedStory && !isEditMode" @click="backToList" class="btn btn-ghost">Kembali</button>
@@ -168,9 +191,9 @@
     <!-- Delete Confirmation Modal -->
     <dialog id="delete_story_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-error">Hapus Cerita</h3>
-                <button @click="closeDeleteModal" class="btn btn-sm btn-circle btn-ghost">
+                <button @click="closeDeleteModal" class="btn btn-sm btn-circle btn-ghost" :disabled="deleting">
                     <X :size="18" />
                 </button>
             </div>
@@ -223,81 +246,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { X, BookOpen, MapPin, Calendar, Edit, Trash2 } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
+import { X, BookOpen, MapPin, Calendar, Edit, Trash2, Eye } from 'lucide-vue-next';
+import { storyService } from '~/services/storyService';
+import { useAuthStore } from '~/stores/auth';
+
+const authStore = useAuthStore();
 
 const isEditMode = ref(false);
 const submitting = ref(false);
+const loading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const selectedStory = ref(null);
 const storyToDelete = ref(null);
 const deleting = ref(false);
 const deleteErrorMessage = ref('');
-
-const myStories = ref([
-    {
-        id: 1,
-        title: 'Legenda Tangkuban Perahu',
-        author: 'Anda',
-        location: 'Bandung, Jawa Barat',
-        date: '15 Des 2024',
-        description: 'Kisah legenda Sangkuriang dan Dayang Sumbi yang menciptakan Gunung Tangkuban Perahu dalam semalam.',
-        full_story: `Dahulu kala, hiduplah seorang putri cantik bernama Dayang Sumbi. Suatu hari, ia menjatuhkan alat tenunnya dan bersumpah akan menikahi siapa saja yang mengambilkannya. Seekor anjing bernama Tumang mengambilkan alat tersebut, dan Dayang Sumbi harus menepati sumpahnya.
-
-Dari pernikahan tersebut, lahirlah seorang anak laki-laki bernama Sangkuriang. Ia tumbuh menjadi pemuda yang gagah dan suka berburu. Suatu hari, saat berburu bersama Tumang, Sangkuriang menjadi marah karena tidak mendapat buruan dan membunuh Tumang.
-
-Ketika mengetahui hal ini, Dayang Sumbi sangat marah dan memukul kepala Sangkuriang hingga luka. Sangkuriang pergi meninggalkan ibunya dan mengembara selama bertahun-tahun.
-
-Bertahun-tahun kemudian, Sangkuriang kembali ke kampung halamannya dan bertemu dengan seorang wanita cantik yang tak lain adalah ibunya sendiri. Karena kesaktiannya, Dayang Sumbi tetap terlihat muda. Mereka saling jatuh cinta dan berencana menikah.
-
-Menjelang pernikahan, Dayang Sumbi menyadari bahwa calon suaminya adalah anaknya sendiri dari bekas luka di kepala Sangkuriang. Untuk menggagalkan pernikahan, ia memberikan syarat yang mustahil: Sangkuriang harus membuat sebuah perahu dan bendungan dalam waktu satu malam.
-
-Dengan kesaktiannya, Sangkuriang hampir berhasil menyelesaikan tugas tersebut. Dayang Sumbi panik dan meminta penduduk menumbuk lesung agar ayam jantan berkokok. Sangkuriang mengira matahari akan terbit dan menendang perahu yang belum selesai. Perahu itu terbalik dan menjadi Gunung Tangkuban Perahu.`
-    },
-    {
-        id: 2,
-        title: 'Cerita Malin Kundang',
-        author: 'Anda',
-        location: 'Padang, Sumatera Barat',
-        date: '10 Des 2024',
-        description: 'Legenda tentang anak durhaka yang dikutuk menjadi batu karena tidak mengakui ibunya sendiri.',
-        full_story: `Malin Kundang adalah seorang anak laki-laki yang hidup bersama ibunya di sebuah desa nelayan miskin. Ayahnya telah meninggal saat melaut ketika Malin masih kecil.
-
-Suatu hari, Malin memutuskan untuk pergi merantau mencari kehidupan yang lebih baik. Dengan berat hati, ibunya melepas kepergian Malin dengan harapan suatu hari ia akan kembali sebagai orang sukses.
-
-Di tanah perantauan, Malin bekerja keras dan beruntung bertemu dengan seorang saudagar kaya yang tidak memiliki anak. Ia diangkat sebagai anak dan mewarisi semua harta saudagar tersebut. Malin menikah dengan putri saudagar yang cantik jelita.
-
-Bertahun-tahun kemudian, Malin berlayar kembali ke kampung halamannya dengan kapal mewah. Ibunya yang sudah tua mendengar kabar kedatangan kapal besar dan berlari ke pelabuhan. Dengan air mata, ia memeluk Malin yang sudah tidak dikenalinya.
-
-Namun Malin, yang malu dengan ibu tuanya yang kumuh di depan istri cantiknya, mengusir ibunya dengan kasar. Ia bahkan tidak mengakui bahwa wanita tua itu adalah ibunya.
-
-Hati ibu Malin hancur berkeping-keping. Dengan penuh kesedihan, ia mengangkat tangannya ke langit dan berdoa agar Malin mendapat balasan atas perbuatannya. Tiba-tiba langit menjadi gelap, angin bertiup kencang, dan badai besar menghantam kapal Malin.
-
-Malin Kundang berubah menjadi batu di tepi pantai, menjadi pengingat abadi tentang akibat durhaka kepada orang tua.`
-    },
-    {
-        id: 3,
-        title: 'Batu Menangis',
-        author: 'Anda',
-        location: 'Kalimantan Barat',
-        date: '5 Des 2024',
-        description: 'Kisah seorang anak perempuan yang durhaka kepada ibunya dan dikutuk menjadi batu yang menangis.',
-        full_story: `Di sebuah desa di Kalimantan, hiduplah seorang janda miskin bersama putrinya yang cantik jelita. Sang ibu bekerja keras sebagai petani untuk membesarkan anaknya sendirian.
-
-Putrinya tumbuh menjadi gadis yang sangat cantik, namun sombong dan tidak menghargai ibunya. Ia malu memiliki ibu yang miskin dan berkulit hitam karena bekerja di bawah terik matahari.
-
-Suatu hari, ada pesta besar di desa sebelah. Sang putri berdandan dengan sangat cantik dan meminta ibunya untuk tidak ikut. Namun sang ibu tetap ingin menemani anaknya.
-
-Di tengah perjalanan, setiap kali ada orang yang bertanya siapa wanita tua yang bersamanya, si gadis selalu menjawab bahwa itu adalah pembantunya, bukan ibunya. Berkali-kali ia melakukan hal yang sama.
-
-Hati sang ibu sangat terluka mendengar pengakuan anaknya. Dengan air mata, ia berdoa kepada Tuhan agar anaknya mendapat pelajaran.
-
-Tiba-tiba hujan deras turun dan petir menyambar. Kaki si gadis mulai membatu, perlahan naik ke tubuhnya. Ia menangis memohon ampun kepada ibunya, tetapi sudah terlambat.
-
-Tubuh gadis cantik itu berubah menjadi batu. Hingga kini, batu tersebut masih ada dan selalu mengeluarkan air seperti air mata, seolah-olah terus menangis menyesali perbuatannya.`
-    }
-]);
+const myStories = ref([]);
 
 const editForm = ref({
     id: null,
@@ -307,12 +272,52 @@ const editForm = ref({
     full_story: ''
 });
 
-const clearError = () => {
+const modalElement = ref(null);
+
+const fetchMyStories = async () => {
+    loading.value = true;
     errorMessage.value = '';
+
+    try {
+        const response = await storyService.getMyStories();
+        myStories.value = response.data || [];
+    } catch (error) {
+        errorMessage.value = error.message || 'Gagal memuat cerita';
+    } finally {
+        loading.value = false;
+    }
 };
 
-const clearSuccess = () => {
-    successMessage.value = '';
+if (process.client) {
+    setTimeout(() => {
+        modalElement.value = document.getElementById('my_stories_modal');
+        if (modalElement.value) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'open') {
+                        if (modalElement.value.open) {
+                            fetchMyStories();
+                        }
+                    }
+                });
+            });
+            observer.observe(modalElement.value, { attributes: true });
+        }
+    }, 100);
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'Tanggal tidak tersedia';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+};
+
+const clearError = () => {
+    errorMessage.value = '';
 };
 
 const clearDeleteError = () => {
@@ -342,27 +347,31 @@ const closeDeleteModal = () => {
     deleting.value = false;
 };
 
-const confirmDelete = () => {
+const confirmDelete = async () => {
     if (!storyToDelete.value) return;
 
     deleting.value = true;
     deleteErrorMessage.value = '';
 
-    setTimeout(() => {
-        deleting.value = false;
+    try {
+        await storyService.deleteStory(storyToDelete.value.id);
+
         const index = myStories.value.findIndex(story => story.id === storyToDelete.value.id);
         if (index !== -1) {
             myStories.value.splice(index, 1);
         }
 
         successMessage.value = `Cerita "${storyToDelete.value.title}" berhasil dihapus!`;
-
         closeDeleteModal();
 
         setTimeout(() => {
             successMessage.value = '';
-        }, 1000);
-    }, 1000);
+        }, 2000);
+    } catch (error) {
+        deleteErrorMessage.value = error.message || 'Gagal menghapus cerita';
+    } finally {
+        deleting.value = false;
+    }
 };
 
 const switchToEdit = (story) => {
@@ -392,7 +401,7 @@ const cancelEdit = () => {
     };
 };
 
-const submitEdit = () => {
+const submitEdit = async () => {
     errorMessage.value = '';
     successMessage.value = '';
 
@@ -418,8 +427,14 @@ const submitEdit = () => {
 
     submitting.value = true;
 
-    setTimeout(() => {
-        submitting.value = false;
+    try {
+        await storyService.updateStory(editForm.value.id, {
+            title: editForm.value.title.trim(),
+            location: editForm.value.location.trim(),
+            description: editForm.value.description.trim(),
+            full_story: editForm.value.full_story.trim()
+        });
+
         successMessage.value = `Cerita "${editForm.value.title}" berhasil diupdate!`;
 
         const index = myStories.value.findIndex(story => story.id === editForm.value.id);
@@ -429,14 +444,20 @@ const submitEdit = () => {
                 title: editForm.value.title,
                 location: editForm.value.location,
                 description: editForm.value.description,
-                full_story: editForm.value.full_story
+                full_story: editForm.value.full_story,
+                updated_at: new Date().toISOString()
             };
         }
 
         setTimeout(() => {
             cancelEdit();
-        }, 1000);
-    }, 1000);
+            successMessage.value = '';
+        }, 1500);
+    } catch (error) {
+        errorMessage.value = error.message || 'Gagal mengupdate cerita';
+    } finally {
+        submitting.value = false;
+    }
 };
 
 const openStoryDetail = (story) => {

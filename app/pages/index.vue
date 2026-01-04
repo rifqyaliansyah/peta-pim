@@ -13,6 +13,14 @@
             </div>
         </Transition>
 
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="absolute inset-0 bg-base-200/50 z-[999] flex items-center justify-center">
+            <div class="flex flex-col items-center gap-4">
+                <span class="loading loading-spinner loading-lg"></span>
+                <p class="text-sm font-semibold">Memuat cerita...</p>
+            </div>
+        </div>
+
         <LMap :zoom="5" :center="[-2.5489, 118.0149]" :use-global-leaflet="false" @click="handleMapClick">
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution="&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
@@ -33,7 +41,11 @@
                     <div class="min-w-[200px]">
                         <h4 class="font-bold text-sm mb-2">{{ story.title }}</h4>
                         <p class="text-xs opacity-70 mb-1">{{ story.location }}</p>
-                        <p class="text-xs mb-3 line-clamp-2">{{ story.description }}</p>
+                        <p class="text-xs mb-2 line-clamp-2">{{ story.description }}</p>
+                        <div class="flex items-center gap-2 text-xs opacity-60 mb-3">
+                            <Eye :size="14" />
+                            <span>{{ story.views_count || 0 }} views</span>
+                        </div>
                         <button @click="viewStoryDetail(story)" class="btn btn-xs btn-primary w-full">
                             Lihat Detail
                         </button>
@@ -71,12 +83,16 @@
                 <div v-if="selectedStory" class="space-y-6">
                     <div>
                         <div class="mb-3">
-                            <p class="font-semibold">{{ selectedStory.author || 'Penulis' }}</p>
-                            <p class="text-xs opacity-60">{{ selectedStory.date || 'Tanggal tidak tersedia' }}</p>
+                            <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
+                            <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-4">
+                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
                             <MapPin :size="16" />
                             <span>{{ selectedStory.location }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm opacity-70">
+                            <Eye :size="16" />
+                            <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
                     </div>
 
@@ -127,9 +143,10 @@
 </template>
 
 <script setup>
-import { X, Plus, MapPin } from 'lucide-vue-next';
+import { X, Plus, MapPin, Eye } from 'lucide-vue-next';
 import { useAddStoryMode } from '~/composables/useAddStoryMode';
-import { ref } from 'vue';
+import { storyService } from '~/services/storyService';
+import { ref, onMounted } from 'vue';
 
 definePageMeta({
     layout: 'map'
@@ -138,53 +155,24 @@ definePageMeta({
 const addStoryModalRef = ref(null);
 const { isAddMode, tempMarker, exitAddMode, setTempMarker, clearTempMarker } = useAddStoryMode();
 const selectedStory = ref(null);
+const stories = ref([]);
+const loading = ref(false);
 
-const stories = ref([
-    {
-        id: 1,
-        title: 'Legenda Tangkuban Perahu',
-        location: 'Bandung, Jawa Barat',
-        description: 'Kisah legenda Sangkuriang dan Dayang Sumbi yang menciptakan Gunung Tangkuban Perahu dalam semalam.',
-        full_story: `Dahulu kala, hiduplah seorang putri cantik bernama Dayang Sumbi. Suatu hari, ia menjatuhkan alat tenunnya dan bersumpah akan menikahi siapa saja yang mengambilkannya. Seekor anjing bernama Tumang mengambilkan alat tersebut, dan Dayang Sumbi harus menepati sumpahnya.
+onMounted(async () => {
+    await fetchStories();
+});
 
-Dari pernikahan tersebut, lahirlah seorang anak laki-laki bernama Sangkuriang. Ia tumbuh menjadi pemuda yang gagah dan suka berburu. Suatu hari, saat berburu bersama Tumang, Sangkuriang menjadi marah karena tidak mendapat buruan dan membunuh Tumang.
-
-Ketika mengetahui hal ini, Dayang Sumbi sangat marah dan memukul kepala Sangkuriang hingga luka. Sangkuriang pergi meninggalkan ibunya dan mengembara selama bertahun-tahun.
-
-Bertahun-tahun kemudian, Sangkuriang kembali ke kampung halamannya dan bertemu dengan seorang wanita cantik yang tak lain adalah ibunya sendiri. Karena kesaktiannya, Dayang Sumbi tetap terlihat muda. Mereka saling jatuh cinta dan berencana menikah.
-
-Menjelang pernikahan, Dayang Sumbi menyadari bahwa calon suaminya adalah anaknya sendiri dari bekas luka di kepala Sangkuriang. Untuk menggagalkan pernikahan, ia memberikan syarat yang mustahil: Sangkuriang harus membuat sebuah perahu dan bendungan dalam waktu satu malam.
-
-Dengan kesaktiannya, Sangkuriang hampir berhasil menyelesaikan tugas tersebut. Dayang Sumbi panik dan meminta penduduk menumbuk lesung agar ayam jantan berkokok. Sangkuriang mengira matahari akan terbit dan menendang perahu yang belum selesai. Perahu itu terbalik dan menjadi Gunung Tangkuban Perahu.`,
-        latitude: -6.7599,
-        longitude: 107.6098,
-        author: 'Budi Santoso',
-        date: '15 Des 2024'
-    },
-    {
-        id: 2,
-        title: 'Cerita Malin Kundang',
-        location: 'Padang, Sumatera Barat',
-        description: 'Legenda tentang anak durhaka yang dikutuk menjadi batu karena tidak mengakui ibunya sendiri.',
-        full_story: `Malin Kundang adalah seorang anak laki-laki yang hidup bersama ibunya di sebuah desa nelayan miskin. Ayahnya telah meninggal saat melaut ketika Malin masih kecil.
-
-Suatu hari, Malin memutuskan untuk pergi merantau mencari kehidupan yang lebih baik. Dengan berat hati, ibunya melepas kepergian Malin dengan harapan suatu hari ia akan kembali sebagai orang sukses.
-
-Di tanah perantauan, Malin bekerja keras dan beruntung bertemu dengan seorang saudagar kaya yang tidak memiliki anak. Ia diangkat sebagai anak dan mewarisi semua harta saudagar tersebut. Malin menikah dengan putri saudagar yang cantik jelita.
-
-Bertahun-tahun kemudian, Malin berlayar kembali ke kampung halamannya dengan kapal mewah. Ibunya yang sudah tua mendengar kabar kedatangan kapal besar dan berlari ke pelabuhan. Dengan air mata, ia memeluk Malin yang sudah tidak dikenalinya.
-
-Namun Malin, yang malu dengan ibu tuanya yang kumuh di depan istri cantiknya, mengusir ibunya dengan kasar. Ia bahkan tidak mengakui bahwa wanita tua itu adalah ibunya.
-
-Hati ibu Malin hancur berkeping-keping. Dengan penuh kesedihan, ia mengangkat tangannya ke langit dan berdoa agar Malin mendapat balasan atas perbuatannya. Tiba-tiba langit menjadi gelap, angin bertiup kencang, dan badai besar menghantam kapal Malin.
-
-Malin Kundang berubah menjadi batu di tepi pantai, menjadi pengingat abadi tentang akibat durhaka kepada orang tua.`,
-        latitude: -0.9471,
-        longitude: 100.4172,
-        author: 'Siti Aminah',
-        date: '10 Des 2024'
+const fetchStories = async () => {
+    loading.value = true;
+    try {
+        const response = await storyService.getAllStories();
+        stories.value = response.data || [];
+    } catch (error) {
+        console.error('Error fetching stories:', error);
+    } finally {
+        loading.value = false;
     }
-]);
+};
 
 const handleMapClick = (event) => {
     if (!isAddMode.value) return;
@@ -221,34 +209,51 @@ const closeLocationWarning = () => {
     document.getElementById('location_warning_modal').close();
 };
 
-const handleStorySubmit = (formData) => {
-    console.log('Story submitted:', formData);
+const handleStorySubmit = async (formData) => {
+    try {
+        await storyService.createStory({
+            title: formData.title,
+            location: formData.location,
+            description: formData.description,
+            full_story: formData.full_story,
+            latitude: formData.coordinates.lat,
+            longitude: formData.coordinates.lng
+        });
 
-    const newStory = {
-        id: stories.value.length + 1,
-        title: formData.title,
-        location: formData.location,
-        description: formData.description,
-        full_story: formData.description,
-        latitude: formData.coordinates.lat,
-        longitude: formData.coordinates.lng,
-        author: 'Anda',
-        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-    };
+        await fetchStories();
 
-    stories.value.push(newStory);
-
-    exitAddMode();
+        exitAddMode();
+    } catch (error) {
+        console.error('Error creating story:', error);
+        throw error;
+    }
 };
 
-const viewStoryDetail = (story) => {
+const viewStoryDetail = async (story) => {
     selectedStory.value = story;
+
+    await storyService.incrementView(story.id);
+
+    if (selectedStory.value.views_count !== undefined) {
+        selectedStory.value.views_count += 1;
+    }
+
     document.getElementById('story_detail_modal').showModal();
 };
 
 const closeDetailModal = () => {
     document.getElementById('story_detail_modal').close();
     selectedStory.value = null;
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'Tanggal tidak tersedia';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
 };
 </script>
 

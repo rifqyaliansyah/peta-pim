@@ -3,7 +3,7 @@
         <div class="modal-box max-w-2xl no-scrollbar">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-xl font-bold">Tambah Cerita Baru</h3>
-                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
+                <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost" :disabled="submitting">
                     <X :size="20" />
                 </button>
             </div>
@@ -49,7 +49,7 @@
                         <span class="label-text font-semibold mb-1">Judul Cerita</span>
                     </label>
                     <input v-model="form.title" type="text" placeholder="Masukkan judul cerita"
-                        class="input input-bordered w-full" @input="clearError" />
+                        class="input input-bordered w-full" @input="clearError" :disabled="submitting" />
                 </div>
 
                 <div class="form-control">
@@ -57,7 +57,7 @@
                         <span class="label-text font-semibold mb-1">Lokasi</span>
                     </label>
                     <input v-model="form.location" type="text" placeholder="Contoh: Bandung, Jawa Barat"
-                        class="input input-bordered w-full" @input="clearError" />
+                        class="input input-bordered w-full" @input="clearError" :disabled="submitting" />
                 </div>
 
                 <div class="form-control">
@@ -65,7 +65,8 @@
                         <span class="label-text font-semibold mb-1">Deskripsi Singkat</span>
                     </label>
                     <textarea v-model="form.description" placeholder="Deskripsi singkat cerita..."
-                        class="textarea textarea-bordered h-24 w-full" @input="clearError"></textarea>
+                        class="textarea textarea-bordered h-24 w-full" @input="clearError"
+                        :disabled="submitting"></textarea>
                     <label class="label">
                         <span class="label-text-alt opacity-60">{{ form.description.length }} karakter</span>
                     </label>
@@ -76,7 +77,8 @@
                         <span class="label-text font-semibold mb-1">Cerita Lengkap</span>
                     </label>
                     <textarea v-model="form.full_story" placeholder="Tulis cerita lengkap di sini..."
-                        class="textarea textarea-bordered h-64 w-full" @input="clearError"></textarea>
+                        class="textarea textarea-bordered h-64 w-full" @input="clearError"
+                        :disabled="submitting"></textarea>
                     <label class="label">
                         <span class="label-text-alt opacity-60">{{ form.full_story.length }} karakter</span>
                     </label>
@@ -133,17 +135,15 @@ const clearError = () => {
     errorMessage.value = '';
 };
 
-const clearSuccess = () => {
-    successMessage.value = '';
-};
-
 const closeModal = () => {
+    if (submitting.value) return;
+
     document.getElementById('add_story_modal').close();
     errorMessage.value = '';
     successMessage.value = '';
 };
 
-const submitForm = () => {
+const submitForm = async () => {
     errorMessage.value = '';
     successMessage.value = '';
 
@@ -169,18 +169,25 @@ const submitForm = () => {
 
     submitting.value = true;
 
-    setTimeout(() => {
-        submitting.value = false;
+    try {
+        await emit('submit', {
+            title: form.value.title.trim(),
+            location: form.value.location.trim(),
+            description: form.value.description.trim(),
+            full_story: form.value.full_story.trim(),
+            coordinates: coordinates.value
+        });
+
         successMessage.value = `Cerita "${form.value.title}" berhasil ditambahkan!`;
 
         setTimeout(() => {
-            emit('submit', {
-                ...form.value,
-                coordinates: coordinates.value
-            });
             closeModal();
-        }, 1000);
-    }, 1000);
+        }, 1500);
+    } catch (error) {
+        errorMessage.value = error.message || 'Gagal menambahkan cerita. Silakan coba lagi.';
+    } finally {
+        submitting.value = false;
+    }
 };
 
 defineExpose({
