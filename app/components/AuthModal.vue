@@ -8,13 +8,30 @@
                 </button>
             </div>
 
+            <!-- Error Alert -->
             <div v-if="errorMessage" class="alert alert-error mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{{ errorMessage }}</span>
+                <div class="flex items-center gap-2 w-full">
+                    <button @click="clearError" class="p-0 bg-transparent border-none cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    <span class="flex-1">{{ errorMessage }}</span>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div v-if="successMessage" class="alert alert-success mb-4">
+                <div class="flex items-center gap-2 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="flex-1">{{ successMessage }}</span>
+                </div>
             </div>
 
             <!-- Login Form -->
@@ -24,7 +41,7 @@
                         <span class="label-text font-semibold mb-1">Email</span>
                     </label>
                     <input v-model="loginForm.email" type="email" placeholder="Email anda"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control">
@@ -32,7 +49,7 @@
                         <span class="label-text font-semibold mb-1">Password</span>
                     </label>
                     <input v-model="loginForm.password" type="password" placeholder="Password anda"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control mt-6">
@@ -59,7 +76,7 @@
                         <span class="label-text font-semibold mb-1">Nama</span>
                     </label>
                     <input v-model="registerForm.name" type="text" placeholder="Nama lengkap"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control">
@@ -67,7 +84,7 @@
                         <span class="label-text font-semibold mb-1">Email</span>
                     </label>
                     <input v-model="registerForm.email" type="email" placeholder="Email anda"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control">
@@ -75,7 +92,7 @@
                         <span class="label-text font-semibold mb-1">Password</span>
                     </label>
                     <input v-model="registerForm.password" type="password" placeholder="Minimal 6 karakter"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control">
@@ -83,7 +100,7 @@
                         <span class="label-text font-semibold mb-1">Confirm Password</span>
                     </label>
                     <input v-model="registerForm.confirmPassword" type="password" placeholder="Ulangi password"
-                        class="input input-bordered w-full" />
+                        class="input input-bordered w-full" @input="clearError" />
                 </div>
 
                 <div class="form-control mt-6">
@@ -113,6 +130,7 @@ import { X } from 'lucide-vue-next';
 const isLoginMode = ref(true);
 const submitting = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 
 const loginForm = ref({
     email: '',
@@ -128,20 +146,33 @@ const registerForm = ref({
 
 const toggleMode = () => {
     isLoginMode.value = !isLoginMode.value;
-    errorMessage.value = '';
-    // Reset forms
+    clearError();
     loginForm.value = { email: '', password: '' };
     registerForm.value = { name: '', email: '', password: '', confirmPassword: '' };
+};
+
+const clearError = () => {
+    errorMessage.value = '';
+};
+
+const showSuccess = (message) => {
+    successMessage.value = message;
+    setTimeout(() => {
+        closeModal();
+    }, 1000);
 };
 
 const closeModal = () => {
     document.getElementById('auth_modal').close();
     errorMessage.value = '';
+    successMessage.value = '';
     isLoginMode.value = true;
+    loginForm.value = { email: '', password: '' };
+    registerForm.value = { name: '', email: '', password: '', confirmPassword: '' };
 };
 
 const handleLogin = () => {
-    errorMessage.value = '';
+    clearError();
 
     if (!loginForm.value.email || !loginForm.value.password) {
         errorMessage.value = 'Email dan password harus diisi';
@@ -150,16 +181,14 @@ const handleLogin = () => {
 
     submitting.value = true;
 
-    // Simulasi login
     setTimeout(() => {
         submitting.value = false;
-        alert('Login berhasil! (dummy)');
-        closeModal();
+        showSuccess('Login berhasil!');
     }, 1000);
 };
 
 const handleRegister = () => {
-    errorMessage.value = '';
+    clearError();
 
     if (!registerForm.value.name || !registerForm.value.email ||
         !registerForm.value.password || !registerForm.value.confirmPassword) {
@@ -179,11 +208,9 @@ const handleRegister = () => {
 
     submitting.value = true;
 
-    // Simulasi register
     setTimeout(() => {
         submitting.value = false;
-        alert('Registrasi berhasil! (dummy)');
-        closeModal();
+        showSuccess('Registrasi berhasil!');
     }, 1000);
 };
 </script>

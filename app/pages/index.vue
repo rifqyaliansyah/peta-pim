@@ -95,6 +95,34 @@
         </div>
     </dialog>
 
+    <dialog id="location_warning_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-warning">Pilih Lokasi</h3>
+                <button @click="closeLocationWarning" class="btn btn-sm btn-circle btn-ghost">
+                    <X :size="18" />
+                </button>
+            </div>
+
+            <div class="alert alert-warning mb-4">
+                <div class="flex items-center gap-2 w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span class="flex-1">Anda belum memilih lokasi di peta!</span>
+                </div>
+            </div>
+
+            <p class="mb-4">Silakan klik peta untuk menentukan lokasi cerita Anda terlebih dahulu.</p>
+
+            <div class="modal-action">
+                <button @click="closeLocationWarning" class="btn btn-primary w-full">OK</button>
+            </div>
+        </div>
+    </dialog>
+
     <AddStoryModal ref="addStoryModalRef" @submit="handleStorySubmit" />
 </template>
 
@@ -177,7 +205,7 @@ const cancelAddMode = () => {
 
 const proceedToAddStory = () => {
     if (!tempMarker.value) {
-        alert('Pilih lokasi dulu di peta!');
+        document.getElementById('location_warning_modal').showModal();
         return;
     }
 
@@ -187,6 +215,10 @@ const proceedToAddStory = () => {
             lng: tempMarker.value[1]
         });
     }
+};
+
+const closeLocationWarning = () => {
+    document.getElementById('location_warning_modal').close();
 };
 
 const handleStorySubmit = (formData) => {
@@ -207,8 +239,6 @@ const handleStorySubmit = (formData) => {
     stories.value.push(newStory);
 
     exitAddMode();
-
-    alert(`Cerita "${formData.title}" berhasil ditambahkan!`);
 };
 
 const viewStoryDetail = (story) => {
