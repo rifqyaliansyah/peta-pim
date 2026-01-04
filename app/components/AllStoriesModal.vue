@@ -133,7 +133,7 @@ const allStories = ref([]);
 const loading = ref(false);
 
 const modalElement = ref(null);
-const emit = defineEmits(['viewOnMap']);
+const emit = defineEmits(['viewOnMap', 'closeDrawer']);
 
 const fetchAllStories = async () => {
     loading.value = true;
@@ -228,6 +228,7 @@ const viewOnMap = () => {
         longitude: selectedStory.value.longitude
     });
 
+    emit('closeDrawer');
     closeModal();
 };
 </script>

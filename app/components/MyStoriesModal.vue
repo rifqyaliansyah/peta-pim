@@ -274,7 +274,7 @@ const storyToDelete = ref(null);
 const deleting = ref(false);
 const deleteErrorMessage = ref('');
 const myStories = ref([]);
-const emit = defineEmits(['storyUpdated', 'storyDeleted', 'viewOnMap']);
+const emit = defineEmits(['storyUpdated', 'storyDeleted', 'viewOnMap', 'closeDrawer']);
 
 const editForm = ref({
     id: null,
@@ -494,6 +494,7 @@ const viewOnMap = () => {
         longitude: selectedStory.value.longitude
     });
 
+    emit('closeDrawer');
     closeModal();
 };
 </script>
