@@ -165,7 +165,7 @@
 
                     <div class="prose max-w-none">
                         <p class="text-base leading-relaxed whitespace-pre-line break-words">{{ selectedStory.full_story
-                            }}</p>
+                        }}</p>
                     </div>
                 </div>
             </div>
@@ -173,7 +173,15 @@
             <!-- Modal Actions -->
             <div class="modal-action mt-6 shrink-0 pt-4 border-t border-base-300">
                 <button v-if="!isEditMode && !selectedStory" @click="closeModal" class="btn btn-ghost">Tutup</button>
-                <button v-if="selectedStory && !isEditMode" @click="backToList" class="btn btn-ghost">Kembali</button>
+
+                <template v-if="selectedStory && !isEditMode">
+                    <button @click="viewOnMap" class="btn btn-primary">
+                        <MapPin :size="18" />
+                        Lihat di Peta
+                    </button>
+                    <button @click="backToList" class="btn btn-ghost">Kembali</button>
+                </template>
+
                 <template v-if="isEditMode">
                     <button @click="cancelEdit" class="btn btn-ghost" :disabled="submitting">Batal</button>
                     <button @click="submitEdit" class="btn btn-primary" :disabled="submitting">
@@ -266,7 +274,7 @@ const storyToDelete = ref(null);
 const deleting = ref(false);
 const deleteErrorMessage = ref('');
 const myStories = ref([]);
-const emit = defineEmits(['storyUpdated', 'storyDeleted']);
+const emit = defineEmits(['storyUpdated', 'storyDeleted', 'viewOnMap']);
 
 const editForm = ref({
     id: null,
@@ -477,6 +485,17 @@ const openStoryDetail = (story) => {
 const backToList = () => {
     selectedStory.value = null;
 };
+
+const viewOnMap = () => {
+    if (!selectedStory.value) return;
+
+    emit('viewOnMap', {
+        latitude: selectedStory.value.latitude,
+        longitude: selectedStory.value.longitude
+    });
+
+    closeModal();
+};
 </script>
 
 <style scoped>
@@ -487,5 +506,12 @@ const backToList = () => {
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 </style>

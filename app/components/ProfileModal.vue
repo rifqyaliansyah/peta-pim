@@ -55,7 +55,7 @@
                         <div class="stat-value text-2xl">{{ totalStories }}</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-title text-xs">Dibuat</div>
+                        <div class="stat-title text-xs">Akun Dibuat</div>
                         <div class="stat-value text-2xl">{{ joinDate }}</div>
                     </div>
                 </div>

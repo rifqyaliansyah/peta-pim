@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <LMap :zoom="5" :center="[-2.5489, 118.0149]" :use-global-leaflet="false" @click="handleMapClick">
+        <LMap ref="mapRef" :zoom="5" :center="[-2.5489, 118.0149]" :use-global-leaflet="false" @click="handleMapClick">
             <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution="&copy; <a href='https://www.openstreetmap.org/'>OpenStreetMap</a> contributors"
                 layer-type="base" name="OpenStreetMap" />
@@ -154,7 +154,8 @@
     </dialog>
 
     <AddStoryModal ref="addStoryModalRef" @submit="handleStorySubmit" />
-    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" />
+    <MyStoriesModal @storyUpdated="handleStoryUpdate" @storyDeleted="handleStoryDelete" @viewOnMap="handleViewOnMap" />
+    <AllStoriesModal @viewOnMap="handleViewOnMap" />
 </template>
 
 <script setup>
@@ -175,6 +176,7 @@ const stories = ref([]);
 const loading = ref(false);
 const isLoadingLocation = ref(false);
 const loadingDetail = ref(null);
+const mapRef = ref(null);
 
 onMounted(async () => {
     await fetchStories();
@@ -279,7 +281,6 @@ const viewStoryDetail = async (story) => {
             selectedStory.value.views_count += 1;
         }
 
-        // Open modal
         document.getElementById('story_detail_modal').showModal();
     } catch (error) {
         console.error('Error viewing story detail:', error);
@@ -301,6 +302,33 @@ const formatDate = (dateString) => {
         month: 'long',
         year: 'numeric'
     });
+};
+
+const zoomToLocation = (latitude, longitude) => {
+    if (mapRef.value && mapRef.value.leafletObject) {
+        const map = mapRef.value.leafletObject;
+        map.setView(
+            [latitude, longitude],
+            15,
+            { animate: true, duration: 1 }
+        );
+    }
+};
+
+const viewOnMapFromDetail = () => {
+    if (!selectedStory.value) return;
+
+    closeDetailModal();
+
+    setTimeout(() => {
+        zoomToLocation(selectedStory.value.latitude, selectedStory.value.longitude);
+    }, 300);
+};
+
+const handleViewOnMap = (coordinates) => {
+    setTimeout(() => {
+        zoomToLocation(coordinates.latitude, coordinates.longitude);
+    }, 300);
 };
 
 const handleStoryUpdate = async () => {
