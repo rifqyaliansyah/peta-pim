@@ -67,9 +67,9 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async updateProfile(name) {
+        async updateProfile(name, oldPassword = null, newPassword = null) {
             try {
-                const response = await authService.updateProfile(name);
+                const response = await authService.updateProfile(name, oldPassword, newPassword);
                 if (response.success) {
                     this.user = response.data.user;
 

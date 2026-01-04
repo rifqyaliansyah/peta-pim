@@ -6,7 +6,7 @@
                     <h3 class="text-xl font-bold break-words" style="word-break: break-word;">{{ selectedStory ?
                         selectedStory.title : 'Semua Cerita' }}</h3>
                     <p v-if="!selectedStory" class="text-sm opacity-60 mt-1">{{ filteredStories.length }} cerita dari
-                        komunitas</p>
+                        pengguna lain</p>
                 </div>
                 <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost shrink-0">
                     <X :size="20" />
@@ -96,20 +96,27 @@
                             <Eye :size="16" class="shrink-0 mt-0.5" />
                             <span>{{ selectedStory.views_count || 0 }} views</span>
                         </div>
+                        <p class="text-sm opacity-80 line-clamp-2 break-words mt-2">{{ selectedStory.description }}</p>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
                         <p class="text-base leading-relaxed whitespace-pre-line break-words">{{ selectedStory.full_story
-                            }}</p>
+                        }}</p>
                     </div>
                 </div>
             </div>
 
             <div class="modal-action mt-6 shrink-0 pt-4 border-t border-base-300">
-                <button v-if="!selectedStory" @click="closeModal" class="btn btn-ghost">Tutup</button>
-                <button v-else @click="backToList" class="btn btn-ghost">Kembali</button>
+                <template v-if="selectedStory">
+                    <button @click="viewOnMap" class="btn btn-primary">
+                        <MapPin :size="18" />
+                        Lihat di Peta
+                    </button>
+                    <button @click="backToList" class="btn btn-ghost">Kembali</button>
+                </template>
+                <button v-else @click="closeModal" class="btn btn-ghost">Tutup</button>
             </div>
         </div>
     </dialog>
@@ -126,6 +133,7 @@ const allStories = ref([]);
 const loading = ref(false);
 
 const modalElement = ref(null);
+const emit = defineEmits(['viewOnMap']);
 
 const fetchAllStories = async () => {
     loading.value = true;
@@ -210,6 +218,17 @@ const openStoryDetail = async (story) => {
 
 const backToList = () => {
     selectedStory.value = null;
+};
+
+const viewOnMap = () => {
+    if (!selectedStory.value) return;
+
+    emit('viewOnMap', {
+        latitude: selectedStory.value.latitude,
+        longitude: selectedStory.value.longitude
+    });
+
+    closeModal();
 };
 </script>
 
