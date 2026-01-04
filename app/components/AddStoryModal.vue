@@ -42,7 +42,7 @@
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <span class="text-sm">Koordinat: {{ coordinates.lat.toFixed(6) }}, {{ coordinates.lng.toFixed(6)
-                    }}</span>
+                        }}</span>
                 </div>
                 <div class="form-control">
                     <label class="label">
@@ -88,7 +88,7 @@
             <div class="modal-action mt-6">
                 <button @click="closeModal" class="btn btn-ghost" :disabled="submitting">Batal</button>
                 <button @click="submitForm" class="btn btn-primary" :disabled="submitting">
-                    <span v-if="submitting" class="loading loading-spinner"></span>
+                    <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -128,6 +128,7 @@ const openModal = (coords) => {
     };
     errorMessage.value = '';
     successMessage.value = '';
+    submitting.value = false;
     document.getElementById('add_story_modal').showModal();
 };
 
@@ -144,6 +145,8 @@ const closeModal = () => {
 };
 
 const submitForm = async () => {
+    if (submitting.value) return;
+
     errorMessage.value = '';
     successMessage.value = '';
 
@@ -181,11 +184,11 @@ const submitForm = async () => {
         successMessage.value = `Cerita "${form.value.title}" berhasil ditambahkan!`;
 
         setTimeout(() => {
+            submitting.value = false;
             closeModal();
         }, 1500);
     } catch (error) {
         errorMessage.value = error.message || 'Gagal menambahkan cerita. Silakan coba lagi.';
-    } finally {
         submitting.value = false;
     }
 };

@@ -58,6 +58,19 @@ export const authService = {
         }
     },
 
+    async getProfile() {
+        return await this.authenticatedRequest('/auth/me', {
+            method: 'GET'
+        });
+    },
+
+    async updateProfile(name) {
+        return await this.authenticatedRequest('/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify({ name })
+        });
+    },
+
     async authenticatedRequest(url, options = {}) {
         const API_BASE_URL = getApiBaseUrl();
         const token = localStorage.getItem('token');

@@ -39,9 +39,9 @@
             <LMarker v-for="story in stories" :key="story.id" :lat-lng="[story.latitude, story.longitude]">
                 <LPopup>
                     <div class="min-w-[200px]">
-                        <h4 class="font-bold text-sm mb-2">{{ story.title }}</h4>
-                        <p class="text-xs opacity-70 mb-1">{{ story.location }}</p>
-                        <p class="text-xs mb-2 line-clamp-2">{{ story.description }}</p>
+                        <h4 class="font-bold text-sm mb-2 wrap-break-word">{{ story.title }}</h4>
+                        <p class="text-xs opacity-70 mb-1 wrap-break-word">{{ story.location }}</p>
+                        <p class="text-xs mb-2 line-clamp-2 wrap-break-word">{{ story.description }}</p>
                         <div class="flex items-center gap-2 text-xs opacity-60 mb-3">
                             <Eye :size="14" />
                             <span>{{ story.views_count || 0 }} views</span>
@@ -55,14 +55,16 @@
         </LMap>
 
         <Transition name="slide-up">
-            <div v-if="isAddMode" class="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-3">
-                <button @click="cancelAddMode" class="btn btn-error btn-lg shadow-lg">
-                    <X :size="20" />
-                    Cancel
+            <div v-if="isAddMode"
+                class="absolute bottom-20 sm:bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex gap-2 sm:gap-3 pb-safe">
+                <button @click="cancelAddMode" class="btn btn-error btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
+                    <X :size="16" class="sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Cancel</span>
                 </button>
-                <button @click="proceedToAddStory" class="btn btn-primary btn-lg shadow-lg">
-                    <Plus :size="20" />
-                    Tambah Cerita
+                <button @click="proceedToAddStory"
+                    class="btn btn-primary btn-md sm:btn-lg shadow-lg flex-1 sm:flex-initial">
+                    <Plus :size="16" class="sm:w-5 sm:h-5" />
+                    <span class="text-sm sm:text-base">Tambah Cerita</span>
                 </button>
             </div>
         </Transition>
@@ -71,7 +73,7 @@
     <dialog id="story_detail_modal" class="modal modal-bottom sm:modal-middle">
         <div class="modal-box max-w-4xl flex flex-col max-h-[90vh]">
             <div class="flex items-center justify-between mb-6 shrink-0">
-                <div>
+                <div class="wrap-break-word overflow-y-auto">
                     <h3 class="text-xl font-bold">{{ selectedStory?.title }}</h3>
                 </div>
                 <button @click="closeDetailModal" class="btn btn-sm btn-circle btn-ghost">
@@ -86,9 +88,9 @@
                             <p class="font-semibold">{{ selectedStory.author?.name || 'Penulis' }}</p>
                             <p class="text-xs opacity-60">{{ formatDate(selectedStory.created_at) }}</p>
                         </div>
-                        <div class="flex items-center gap-2 text-sm opacity-70 mb-2">
-                            <MapPin :size="16" />
-                            <span>{{ selectedStory.location }}</span>
+                        <div class="flex items-start gap-2 text-sm opacity-70 mb-2">
+                            <MapPin :size="16" class="shrink-0 mt-0.5" />
+                            <span class="break-words flex-1">{{ selectedStory.location }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm opacity-70">
                             <Eye :size="16" />
@@ -99,7 +101,7 @@
                     <div class="divider"></div>
 
                     <div class="prose max-w-none">
-                        <p class="text-base leading-relaxed whitespace-pre-line">{{ selectedStory.full_story ||
+                        <p class="text-base leading-relaxed whitespace-pre-line wrap-break-word">{{ selectedStory.full_story ||
                             selectedStory.description }}</p>
                     </div>
                 </div>
